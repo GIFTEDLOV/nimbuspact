@@ -1,0 +1,86 @@
+{
+  "project": "NimbusPact",
+  "network": "Testnet Bradbury",
+  "rpc_endpoint": "https://rpc-bradbury.genlayer.com",
+  "contract_address": "0xEAA6Cb19AcB1E81e729224c590a5Cd5060D0c934",
+  "deployment_hash": "0xf02ddbb1fa117ad1dbbabf32dfc41f912fb7d4ac42eda77e9f5130c8186610db",
+  "source_deployment_sha256": "1a6386e22ffc60d8beae3640569bf25ec6582c7896bb565bb1b161b96810e310",
+  "deployment": {
+    "status": "FINALIZED",
+    "status_code": 7,
+    "execution_result": "FINISHED_WITH_RETURN",
+    "execution_result_code": 1,
+    "consensus_result": "AGREE",
+    "consensus_result_code": 1,
+    "validator_votes": "5/5 AGREE"
+  },
+  "smoke": {
+    "create": {
+      "hash": "0x54d931db9b233e64863d33a1aa3150b915b99dfdca44bd3923109c7e6fa5cffd",
+      "status": "FINALIZED / 7",
+      "execution_result": "FINISHED_WITH_RETURN / 1",
+      "consensus_result": "AGREE / 1; 5/5 validators",
+      "finalized_utc": "2026-08-31T20:10:52.575Z"
+    },
+    "resolve": {
+      "hash": "0xa1487d1c4819cb0aec4f97ddb802f861e4f19c452766527818278ba4210a92be",
+      "status": "FINALIZED / 7",
+      "execution_result": "FINISHED_WITH_RETURN / 1",
+      "consensus_result": "AGREE / 1; 5/5 validators",
+      "finalized_utc": "2026-08-31T20:44:51.834Z",
+      "policy_id": "p-1",
+      "policy_status": "TRIGGERED",
+      "observed_value": "1.900",
+      "resolution_code": "NONE",
+      "evidence_digest": "98fc65e67f89c7b3bf105c334e4a3ae1f7a0cec978831a1921ff83532a676405"
+    },
+    "claim": {
+      "hash": "0x8fd84714fa7cda44eb8149aff8a6c58eafd720668ca429120d114508989d591e",
+      "status": "FINALIZED / 7",
+      "execution_result": "FINISHED_WITH_RETURN / 1",
+      "consensus_result": "AGREE / 1; 5/5 validators",
+      "finalized_utc": "2026-09-01T06:45:27.676Z",
+      "policy_id": "p-1",
+      "policy_status": "CLAIMED",
+      "withdrawn": true
+    }
+  },
+  "settlement": {
+    "beneficiary": "0x6311dE989ab01Ae4Da77d36CC45d495fbCd4B7a8",
+    "payout_amount_wei": "100000000000000000",
+    "beneficiary_balance_before_wei": "3006551939442368502",
+    "beneficiary_balance_after_wei": "3106253142570034402",
+    "gross_settlement_amount_wei": "100000000000000000",
+    "observed_net_balance_delta_wei": "99701203127665900",
+    "documented_wrapper_fee_delta_wei": "-298796872334100",
+    "prior_reverted_wrapper_fee_wei": "155280256280100",
+    "successful_claim_wrapper_fee_wei": "143516616054000",
+    "contract_balance_before_wei": "100000000000000000",
+    "contract_balance_after_wei": "0",
+    "separate_child_receipt": false,
+    "settlement_carrier_evm_transaction": "0xc96980954e6dbc9951ccf90b9828a7a78a8a229cd3940ad18232bf9a45582312",
+    "settlement_carrier_status": "0x1",
+    "settlement_carrier_block": "0x1348d15",
+    "settlement_carrier_parent_claim_reference": "0x8fd84714fa7cda44eb8149aff8a6c58eafd720668ca429120d114508989d591e",
+    "settlement_balance_transition_before_wei": "3006253142570034402",
+    "settlement_balance_transition_after_wei": "3106253142570034402",
+    "settlement_verified": true,
+    "balance_read_utc": "2026-09-01T06:46:12.439Z"
+  },
+  "policy_final_state": {
+    "policy_id": "p-1",
+    "status": "CLAIMED",
+    "withdrawn": true,
+    "duplicate_claim_blocked": true,
+    "contract_balance_after_settlement_wei": "0"
+  },
+  "prior_reverted_claim": {
+    "hash": "0xbe2fd099ec7f1b52db4a412bd2b587006c237a6ccf6aa516467f430d695c6d6b",
+    "classification": "prior reverted EVM-wrapper claim attempt; not successful live proof",
+    "receipt_status": "0x0"
+  },
+  "evidence_timestamps_utc": {
+    "claim_current_status_query": "2026-09-01T06:45:27.676Z",
+    "claim_finalized_state_read": "2026-09-01T06:45:45.679Z"
+  }
+}

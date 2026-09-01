@@ -55,5 +55,16 @@ test("maps timeout and consensus errors to retryable reconcile states", () => {
 test("keeps DATA_UNAVAILABLE separate from transaction consensus outcomes", () => {
   assert.match(policyStatusMessage("DATA_UNAVAILABLE"), /unavailable|malformed|no positive trigger/i);
   assert.match(policyStatusMessage("TRIGGERED"), /finalized|claimable/i);
+  assert.match(policyStatusMessage("CLAIMED"), /finalized|claimed/i);
+  assert.doesNotMatch(policyStatusMessage("CLAIMED"), /claimable/i);
   assert.match(policyStatusMessage("NOT_TRIGGERED"), /non-triggered|No payout/i);
+});
+
+test("fails closed when a finalized receipt omits the transaction execution result", () => {
+  const result = classifyReceipt({
+    statusName: "FINALIZED",
+    consensus_data: { leader_receipt: [{ execution_result: "SUCCESS" }] },
+  }, HASH);
+  assert.equal(result.state, "EXECUTION_FAILED");
+  assert.equal(result.executionSucceeded, false);
 });

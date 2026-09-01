@@ -86,10 +86,6 @@ export function classifyReceipt(receipt: unknown, hash: string): LifecycleOutcom
     1: ExecutionResult.FINISHED_WITH_RETURN,
     2: ExecutionResult.FINISHED_WITH_ERROR,
   });
-  const consensus = record(raw.consensus_data);
-  const leaderReceipt = Array.isArray(consensus.leader_receipt) ? record(consensus.leader_receipt[0]) : {};
-  const leaderExecution = typeof leaderReceipt.execution_result === "string" ? leaderReceipt.execution_result : "";
-
   if (status === TransactionStatus.UNDETERMINED || result === TransactionResult.DISAGREE || result === TransactionResult.NO_MAJORITY || result === TransactionResult.MAJORITY_DISAGREE) {
     return unresolvedOutcome(
       "UNDETERMINED",
@@ -125,7 +121,7 @@ export function classifyReceipt(receipt: unknown, hash: string): LifecycleOutcom
     );
   }
 
-  const executionSucceeded = execution === ExecutionResult.FINISHED_WITH_RETURN || leaderExecution === "SUCCESS";
+  const executionSucceeded = execution === ExecutionResult.FINISHED_WITH_RETURN;
   if (executionSucceeded) {
     return outcome("SUCCESS", hash, true, true, false, "success", `Transaction ${shortHash(hash)} finalized successfully.`);
   }
@@ -174,7 +170,8 @@ export function classifyLifecycleError(error: unknown, hash: string): LifecycleO
 
 export function policyStatusMessage(status: string): string {
   if (status === "DATA_UNAVAILABLE") return "The weather source was unavailable or malformed. NimbusPact failed closed and recorded no positive trigger.";
-  if (status === "TRIGGERED" || status === "CLAIMED") return "Validators finalized a triggered result. The funded payout is claimable by the beneficiary.";
+  if (status === "CLAIMED") return "Validators finalized a triggered result and the funded payout has been claimed by the beneficiary.";
+  if (status === "TRIGGERED") return "Validators finalized a triggered result. The funded payout is claimable by the beneficiary.";
   if (status === "NOT_TRIGGERED") return "Validators finalized a non-triggered result. No payout is due.";
   return "Resolve this active policy to ask validators to inspect its fixed evidence source.";
 }

@@ -34,15 +34,15 @@
           <div class="trust-line"><ShieldCheck :size="16" /> No centralized weather decision-maker</div>
         </div>
 
-        <div class="hero-card" aria-label="Example finalized coverage">
-          <div class="hero-card-top"><span class="tiny-label">LIVE POLICY SNAPSHOT</span><span class="status-tag tag-triggered">FINALIZED</span></div>
+        <div class="hero-card" aria-label="Bradbury smoke proof snapshot">
+          <div class="hero-card-top"><span class="tiny-label">BRADBURY PROOF SNAPSHOT</span><span class="status-tag tag-triggered">FINALIZED</span></div>
           <div class="weather-icon"><CloudLightning :size="36" /></div>
           <div class="hero-location">Lagos, NG <span>·</span> 06°31'N 03°23'E</div>
           <div class="hero-trigger">Heavy rain cover</div>
-          <div class="hero-metric-row"><strong>74.2 mm</strong><span>observed peak</span></div>
-          <div class="threshold-track"><span style="width: 82%"></span></div>
-          <div class="track-labels"><span>Threshold 50 mm</span><span class="success-copy">Trigger confirmed</span></div>
-          <div class="hero-card-footer"><span>0x7A…E91C</span><span>p-024</span><span>0.80 GEN funded</span></div>
+          <div class="hero-metric-row"><strong>1.900 mm</strong><span>observed peak</span></div>
+          <div class="threshold-track"><span style="width: 100%"></span></div>
+          <div class="track-labels"><span>Threshold 0.000 mm</span><span class="success-copy">Trigger confirmed</span></div>
+          <div class="hero-card-footer"><span>0xEAA6…C934</span><span>p-1</span><span>0.10 GEN funded</span></div>
         </div>
       </section>
 
