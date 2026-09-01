@@ -1,74 +1,124 @@
 <template>
   <div class="app-shell">
-    <header class="topbar">
+    <div class="release-strip">
+      <span>LIVE ON TESTNET BRADBURY</span>
+      <span class="release-strip-copy">Finalized create → resolve → claim proof verified</span>
+      <a href="https://github.com/GIFTEDLOV/nimbuspact/blob/master/docs/live-proof/bradbury-smoke.json" target="_blank" rel="noreferrer">
+        View proof <ArrowUpRight :size="13" />
+      </a>
+    </div>
+
+    <header class="topbar section-width">
       <a class="brand" href="#top" aria-label="NimbusPact home">
-        <span class="brand-mark"><CloudRain :size="20" stroke-width="2.4" /></span>
-        <span>Nimbus<span class="brand-accent">Pact</span></span>
+        <span class="brand-mark"><CloudRain :size="19" stroke-width="2.2" /></span>
+        <span>NimbusPact</span>
       </a>
 
       <nav class="nav-links" aria-label="Main navigation">
         <a href="#coverage">Coverage</a>
         <a href="#how-it-works">How it works</a>
-        <a href="#technical">Technical details</a>
+        <a href="#technical">Trust model</a>
       </nav>
 
       <button class="wallet-button" :class="{ connected: walletAddress }" @click="handleWallet">
-        <WalletCards :size="17" />
+        <WalletCards :size="16" />
         {{ walletAddress ? shortAddress(walletAddress) : "Connect wallet" }}
       </button>
     </header>
 
     <main id="top">
       <section class="hero section-width">
+        <div class="hero-grid-lines" aria-hidden="true"></div>
+        <div class="hero-accent-shape" aria-hidden="true"></div>
+
         <div class="hero-copy">
-          <div class="eyebrow"><span class="pulse-dot"></span> Consensus-backed weather coverage</div>
-          <h1>When the weather crosses the line, <em>your cover moves.</em></h1>
+          <span class="eyebrow">Parametric weather cover, executed by consensus</span>
+          <h1>Weather cover<br /><em>built for execution.</em></h1>
           <p class="hero-lede">
-            Fund a policy for a real location, let GenLayer validators inspect the same public weather evidence,
-            and claim a payout only when the finalized on-chain decision says the trigger happened.
+            Fund a clear weather condition, let GenLayer validators independently inspect the same fixed public evidence,
+            and release the payout only when the finalized Intelligent Contract state says the trigger occurred.
           </p>
           <div class="hero-actions">
-            <a class="primary-button" href="#create">Create a policy <ArrowDownRight :size="17" /></a>
-            <a class="text-link" href="#how-it-works">See how settlement works <ArrowUpRight :size="15" /></a>
+            <a class="primary-button" href="#create">Create a policy <ArrowDownRight :size="16" /></a>
+            <a class="secondary-link" href="#how-it-works">See the settlement path <ArrowUpRight :size="14" /></a>
           </div>
-          <div class="trust-line"><ShieldCheck :size="16" /> No centralized weather decision-maker</div>
         </div>
 
-        <div class="hero-card" aria-label="Bradbury smoke proof snapshot">
-          <div class="hero-card-top"><span class="tiny-label">BRADBURY PROOF SNAPSHOT</span><span class="status-tag tag-triggered">FINALIZED</span></div>
-          <div class="weather-icon"><CloudLightning :size="36" /></div>
-          <div class="hero-location">Lagos, NG <span>·</span> 06°31'N 03°23'E</div>
-          <div class="hero-trigger">Heavy rain cover</div>
-          <div class="hero-metric-row"><strong>1.900 mm</strong><span>observed peak</span></div>
-          <div class="threshold-track"><span style="width: 100%"></span></div>
-          <div class="track-labels"><span>Threshold 0.000 mm</span><span class="success-copy">Trigger confirmed</span></div>
-          <div class="hero-card-footer"><span>0xEAA6…C934</span><span>p-1</span><span>0.10 GEN funded</span></div>
+        <aside class="proof-card" aria-label="Bradbury live proof snapshot">
+          <div class="proof-card-head">
+            <span>Finalized proof / p-1</span>
+            <span class="proof-status"><CircleCheck :size="13" /> Verified</span>
+          </div>
+          <div class="proof-location">Lagos, Nigeria</div>
+          <div class="proof-title">Heavy rain trigger</div>
+          <div class="proof-metric">
+            <strong>1.900</strong>
+            <div><span>mm</span><small>observed peak</small></div>
+          </div>
+          <div class="proof-rule"><span>Threshold</span><b>≥ 0.000 mm</b></div>
+          <div class="proof-divider"></div>
+          <dl class="proof-list">
+            <div><dt>Resolution</dt><dd>TRIGGERED</dd></div>
+            <div><dt>Settlement</dt><dd>CLAIMED</dd></div>
+            <div><dt>Payout</dt><dd>0.10 GEN</dd></div>
+            <div><dt>Contract</dt><dd>0xEAA6…C934</dd></div>
+          </dl>
+        </aside>
+      </section>
+
+      <section class="trust-band section-width" aria-label="NimbusPact trust model summary">
+        <div><span>01</span><strong>No project oracle backend</strong><p>The IC constructs and reads the fixed Open-Meteo Archive request itself.</p></div>
+        <div><span>02</span><strong>Consensus before payout</strong><p>A positive trigger must reach finalized contract state before the beneficiary can claim.</p></div>
+        <div><span>03</span><strong>Evidence commitment</strong><p>The normalized evidence is SHA-256 committed on the resolved policy for auditability.</p></div>
+      </section>
+
+      <section class="editorial-intro section-width">
+        <div class="editorial-label">THE PRODUCT</div>
+        <div class="editorial-copy">
+          <h2>Parametric cover with a decision trail you can audit.</h2>
+          <p>
+            NimbusPact removes the application backend from the payout decision. Policy terms are bounded on-chain,
+            validators independently fetch the same source, the Intelligent Contract computes the threshold result,
+            and the frontend reconciles the original transaction hash through finality instead of blindly rebroadcasting.
+          </p>
         </div>
       </section>
 
-      <section class="stats section-width" aria-label="NimbusPact overview">
-        <div class="stat-card"><span>Policies on-chain</span><strong>{{ policies.length.toString().padStart(2, "0") }}</strong><small>Directly readable from the IC</small></div>
-        <div class="stat-card"><span>Funded coverage</span><strong>{{ totalFunded }}</strong><small>GEN committed to policies</small></div>
-        <div class="stat-card"><span>Fixed evidence source</span><strong class="source-stat">Open-Meteo</strong><small>Archive API · UTC daily data</small></div>
-        <div class="stat-card"><span>Settlement rule</span><strong class="source-stat">Finalized only</strong><small>Consensus success before state read</small></div>
+      <section class="stats section-width" aria-label="NimbusPact live overview">
+        <div class="stat-card"><span>Policies on-chain</span><strong>{{ policies.length.toString().padStart(2, "0") }}</strong><small>Direct Bradbury contract read</small></div>
+        <div class="stat-card"><span>Locked policy value</span><strong>{{ lockedCollateral }}</strong><small>GEN attached to unclaimed policies</small></div>
+        <div class="stat-card"><span>Evidence source</span><strong class="text-stat">Open-Meteo</strong><small>Archive API · fixed request · UTC</small></div>
+        <div class="stat-card"><span>Execution rule</span><strong class="text-stat">Finalized only</strong><small>State read after successful execution</small></div>
       </section>
 
       <section id="coverage" class="workspace section-width">
         <div class="section-heading">
-          <div><span class="section-kicker">Coverage desk</span><h2>Your weather policies</h2></div>
-          <button class="quiet-button" :disabled="loading" @click="refresh"><RefreshCw :class="{ spinning: loading }" :size="15" /> {{ recovery.length ? "Check again" : "Refresh state" }}</button>
+          <div>
+            <span class="section-kicker">Coverage desk</span>
+            <h2>Create, resolve, and settle.</h2>
+          </div>
+          <button class="quiet-button" :disabled="loading" @click="refresh">
+            <RefreshCw :class="{ spinning: loading }" :size="14" />
+            {{ recovery.length ? "Check pending hash" : "Refresh state" }}
+          </button>
         </div>
 
         <div v-if="notice" class="notice" :class="`notice-${notice.kind}`" role="status">
-          <component :is="notice.kind === 'success' ? CircleCheck : AlertTriangle" :size="18" />
+          <component :is="notice.kind === 'success' ? CircleCheck : AlertTriangle" :size="17" />
           <span>{{ notice.message }}</span>
           <button class="notice-close" aria-label="Dismiss message" @click="notice = null">×</button>
         </div>
 
         <div class="workspace-grid">
           <section id="create" class="panel create-panel">
-            <div class="panel-heading"><div><span class="section-kicker">New cover</span><h3>Fund a policy</h3></div><span class="step-count">01 / 03</span></div>
-            <p class="panel-intro">Set one clear condition. The contract builds the fixed Open-Meteo evidence URL from these validated fields.</p>
+            <div class="panel-heading">
+              <div><span class="section-kicker">New policy</span><h3>Commit the payout</h3></div>
+              <span class="step-count">01 / 03</span>
+            </div>
+            <p class="panel-intro">
+              Choose one bounded weather condition. The contract canonicalizes these fields and constructs the fixed evidence URL.
+            </p>
+
             <form @submit.prevent="submitCreate">
               <label class="field full-field"><span>Location label</span><input v-model.trim="form.locationName" required maxlength="64" placeholder="e.g. Lagos Island" /></label>
               <div class="field-row">
@@ -80,60 +130,148 @@
                 <label class="field"><span>Observation end</span><input v-model="form.endDate" type="date" required /></label>
               </div>
               <div class="field-row">
-                <label class="field"><span>Trigger type</span><select v-model="form.triggerType" @change="syncThreshold"><option value="HEAVY_RAIN">Heavy rain</option><option value="EXTREME_HEAT">Extreme heat</option><option value="SEVERE_STORM">Severe storm</option></select></label>
+                <label class="field">
+                  <span>Trigger type</span>
+                  <select v-model="form.triggerType" @change="syncThreshold">
+                    <option value="HEAVY_RAIN">Heavy rain</option>
+                    <option value="EXTREME_HEAT">Extreme heat</option>
+                    <option value="SEVERE_STORM">Severe storm</option>
+                  </select>
+                </label>
                 <label class="field"><span>Threshold <small>{{ thresholdUnit }}</small></span><input v-model.trim="form.threshold" inputmode="decimal" required /></label>
               </div>
               <label class="field full-field"><span>Beneficiary address</span><input v-model.trim="form.beneficiary" required placeholder="0x…" /></label>
               <label class="field full-field"><span>Payout amount <small>GEN</small></span><div class="amount-input"><input v-model.trim="form.payout" inputmode="decimal" required placeholder="0.25" /><span>GEN</span></div></label>
-              <div class="funding-note"><LockKeyhole :size="15" /><span>Creating sends the exact payout amount to the contract. It cannot be withdrawn by the creator.</span></div>
+
+              <div class="funding-note">
+                <LockKeyhole :size="15" />
+                <span>
+                  This deployed Bradbury version irrevocably commits the exact payout amount. Only a triggered beneficiary claim releases it; there is no creator refund path.
+                </span>
+              </div>
+
               <button class="submit-button" type="submit" :disabled="busy || !configured || !walletAddress">
-                <LoaderCircle v-if="busy" class="spinning" :size="17" /><span v-else>Fund policy</span><ArrowUpRight v-if="!busy" :size="16" />
+                <LoaderCircle v-if="busy" class="spinning" :size="16" />
+                <span v-else>Fund policy</span>
+                <ArrowUpRight v-if="!busy" :size="15" />
               </button>
               <p v-if="!configured" class="form-hint warning-copy">Add VITE_CONTRACT_ADDRESS to connect this interface to a deployed NimbusPact IC.</p>
-              <p v-else-if="!walletAddress" class="form-hint">Connect a wallet to fund a policy on {{ networkLabel }}.</p>
+              <p v-else-if="!walletAddress" class="form-hint">Connect a wallet on {{ networkLabel }} to fund a policy.</p>
             </form>
           </section>
 
           <section class="policy-column">
-            <div v-if="recovery.length" class="recovery-banner"><Clock3 :size="17" /><div><strong>Pending transaction recovery</strong><span>{{ recovery.length }} transaction{{ recovery.length === 1 ? "" : "s" }} remain linked to the original hash{{ recovery.length === 1 ? " " + shortHash(recovery[0]?.hash || "") : "es" }}. No replacement transaction will be sent automatically.</span></div><button class="inline-button" :disabled="loading" @click="refresh"><RefreshCw :size="14" /> Check again</button></div>
-            <div v-if="!policies.length && !loading" class="empty-state"><CloudSun :size="30" /><h3>No policies yet</h3><p>Fund the first policy and this desk will show its full settlement trail.</p></div>
+            <div v-if="recovery.length" class="recovery-banner">
+              <Clock3 :size="17" />
+              <div>
+                <strong>Original hash preserved</strong>
+                <span>{{ recovery.length }} transaction{{ recovery.length === 1 ? "" : "s" }} remain linked to the saved hash{{ recovery.length === 1 ? " " + shortHash(recovery[0]?.hash || "") : "es" }}. NimbusPact will reconcile, not rebroadcast.</span>
+              </div>
+              <button class="inline-button" :disabled="loading" @click="refresh"><RefreshCw :size="13" /> Check again</button>
+            </div>
+
+            <div v-if="!policies.length && !loading" class="empty-state">
+              <CloudSun :size="28" />
+              <h3>No policies yet</h3>
+              <p>Fund the first policy and its complete state trail will appear here.</p>
+            </div>
+
             <article v-for="policy in policies" :key="policy.policy_id" class="policy-card" :class="{ selected: selectedPolicy?.policy_id === policy.policy_id }" @click="selectPolicy(policy)">
-              <div class="policy-card-header"><span class="policy-id">{{ policy.policy_id }}</span><span class="status-tag" :class="statusClass(policy.status)">{{ statusLabel(policy.status) }}</span></div>
-              <div class="policy-main"><div><h3>{{ policy.location_name }}</h3><p>{{ triggerLabel(policy.trigger_type) }} · {{ policy.start_date }} → {{ policy.end_date }}</p></div><strong>{{ formatGen(policy.payout_amount) }} <small>GEN</small></strong></div>
-              <div class="policy-rule"><span>{{ policy.metric }}</span><span>≥ {{ policy.threshold }} {{ metricUnit(policy.metric) }}</span><span class="rule-arrow">→</span></div>
-              <div class="policy-card-footer"><span>Beneficiary {{ shortAddress(policy.beneficiary) }}</span><button v-if="policy.status === 'ACTIVE'" class="inline-button" :disabled="busy" @click.stop="resolve(policy)"><Radar :size="14" /> Resolve</button><button v-else-if="policy.status === 'TRIGGERED' && !policy.withdrawn" class="inline-button claim" :disabled="busy" @click.stop="claim(policy)"><HandCoins :size="14" /> Claim payout</button><span v-else>{{ policy.status === "CLAIMED" ? "Payout claimed" : "Resolution recorded" }}</span></div>
+              <div class="policy-card-header">
+                <span class="policy-id">{{ policy.policy_id }}</span>
+                <span class="status-tag" :class="statusClass(policy.status)">{{ statusLabel(policy.status) }}</span>
+              </div>
+              <div class="policy-main">
+                <div><h3>{{ policy.location_name }}</h3><p>{{ triggerLabel(policy.trigger_type) }} · {{ policy.start_date }} → {{ policy.end_date }}</p></div>
+                <strong>{{ formatGen(policy.payout_amount) }} <small>GEN</small></strong>
+              </div>
+              <div class="policy-rule"><span>{{ policy.metric }}</span><span>≥ {{ policy.threshold }} {{ metricUnit(policy.metric) }}</span></div>
+              <div class="policy-card-footer">
+                <span>Beneficiary {{ shortAddress(policy.beneficiary) }}</span>
+                <button v-if="policy.status === 'ACTIVE'" class="inline-button" :disabled="busy || !resolutionWindowClosed(policy)" :title="resolutionWindowClosed(policy) ? 'Resolve policy' : 'Wait until the observation window has closed'" @click.stop="resolve(policy)">
+                  <Radar :size="13" /> {{ resolutionWindowClosed(policy) ? "Resolve" : "Window open" }}
+                </button>
+                <button v-else-if="policy.status === 'TRIGGERED' && !policy.withdrawn" class="inline-button claim" :disabled="busy" @click.stop="claim(policy)"><HandCoins :size="13" /> Claim payout</button>
+                <span v-else>{{ policy.status === "CLAIMED" ? "Payout claimed" : "Resolution recorded" }}</span>
+              </div>
             </article>
           </section>
         </div>
       </section>
 
       <section v-if="selectedPolicy" class="detail-section section-width" aria-live="polite">
-        <div class="detail-heading"><div><span class="section-kicker">Policy detail</span><h2>{{ selectedPolicy.location_name }} <span class="muted-id">{{ selectedPolicy.policy_id }}</span></h2></div><span class="status-tag" :class="statusClass(selectedPolicy.status)">{{ statusLabel(selectedPolicy.status) }}</span></div>
+        <div class="detail-heading">
+          <div><span class="section-kicker">Policy detail</span><h2>{{ selectedPolicy.location_name }} <span class="muted-id">{{ selectedPolicy.policy_id }}</span></h2></div>
+          <span class="status-tag" :class="statusClass(selectedPolicy.status)">{{ statusLabel(selectedPolicy.status) }}</span>
+        </div>
         <div class="detail-grid">
-          <div class="detail-box"><span class="detail-label">Resolution result</span><strong>{{ resultTitle(selectedPolicy) }}</strong><p>{{ resultDescription(selectedPolicy) }}</p><div v-if="selectedPolicy.observed_value" class="observed-value">Observed peak <b>{{ selectedPolicy.observed_value }} {{ metricUnit(selectedPolicy.metric) }}</b></div></div>
-          <div class="detail-box"><span class="detail-label">Evidence commitment</span><strong>{{ selectedPolicy.evidence_digest ? "Digest recorded" : "Awaiting resolution" }}</strong><p>Validators inspect the fixed Open-Meteo URL constructed from this policy’s location and dates.</p><code v-if="selectedPolicy.evidence_digest">sha256:{{ selectedPolicy.evidence_digest }}</code><a :href="selectedPolicy.evidence_url" target="_blank" rel="noreferrer">View fixed evidence URL <ArrowUpRight :size="13" /></a></div>
-          <div class="detail-box"><span class="detail-label">Payout state</span><strong>{{ selectedPolicy.withdrawn ? "Transferred" : selectedPolicy.status === "TRIGGERED" ? "Claimable" : "Locked" }}</strong><p>Only the beneficiary can claim, and only after a successful finalized trigger resolution.</p><span class="beneficiary-chip"><UserRound :size="14" /> {{ shortAddress(selectedPolicy.beneficiary) }}</span></div>
+          <div class="detail-box">
+            <span class="detail-label">Resolution</span>
+            <strong>{{ resultTitle(selectedPolicy) }}</strong>
+            <p>{{ resultDescription(selectedPolicy) }}</p>
+            <div v-if="selectedPolicy.observed_value" class="observed-value">Observed peak <b>{{ selectedPolicy.observed_value }} {{ metricUnit(selectedPolicy.metric) }}</b></div>
+          </div>
+          <div class="detail-box">
+            <span class="detail-label">Evidence commitment</span>
+            <strong>{{ selectedPolicy.evidence_digest ? "Digest recorded" : "Awaiting resolution" }}</strong>
+            <p>Validators inspect the fixed Open-Meteo URL constructed from the policy’s canonical location and dates.</p>
+            <code v-if="selectedPolicy.evidence_digest">sha256:{{ selectedPolicy.evidence_digest }}</code>
+            <a :href="selectedPolicy.evidence_url" target="_blank" rel="noreferrer">View fixed evidence URL <ArrowUpRight :size="13" /></a>
+          </div>
+          <div class="detail-box">
+            <span class="detail-label">Payout state</span>
+            <strong>{{ selectedPolicy.withdrawn ? "Transferred" : selectedPolicy.status === "TRIGGERED" ? "Claimable" : "Locked" }}</strong>
+            <p>Only the beneficiary can claim, and only after a successful finalized trigger resolution.</p>
+            <span class="beneficiary-chip"><UserRound :size="13" /> {{ shortAddress(selectedPolicy.beneficiary) }}</span>
+          </div>
         </div>
       </section>
 
       <section id="how-it-works" class="how-section section-width">
-        <div class="how-intro"><span class="section-kicker">The settlement path</span><h2>A weather decision with a receipt.</h2><p>Every write is treated as a lifecycle, not a fire-and-forget button. The UI saves the hash, waits for finality, verifies successful execution, then reads the expected policy state.</p></div>
-        <div class="steps"><div class="step"><span>01</span><ShieldCheck :size="20" /><h3>Fund</h3><p>Your wallet sends exactly the stated payout amount to the payable IC.</p></div><div class="step"><span>02</span><Radar :size="20" /><h3>Resolve</h3><p>Validators independently fetch the same constructed Open-Meteo evidence URL.</p></div><div class="step"><span>03</span><CircleCheck :size="20" /><h3>Claim</h3><p>A triggered result becomes pull-claimable for the beneficiary after finalization.</p></div></div>
+        <div class="how-heading">
+          <span class="section-kicker">The settlement path</span>
+          <h2>Three actions.<br /><em>One preserved trail.</em></h2>
+        </div>
+        <div class="steps">
+          <div class="step"><span class="step-index">01</span><ShieldCheck :size="20" /><h3>Fund</h3><p>The creator sends exactly the stated payout amount into the payable Intelligent Contract.</p></div>
+          <div class="step"><span class="step-index">02</span><Radar :size="20" /><h3>Resolve</h3><p>After the observation window closes, validators independently fetch the same fixed Open-Meteo request and reach strict-equivalence consensus.</p></div>
+          <div class="step"><span class="step-index">03</span><CircleCheck :size="20" /><h3>Claim</h3><p>A finalized triggered state becomes pull-claimable by the beneficiary and emits the GEN transfer on finalization.</p></div>
+        </div>
       </section>
 
       <section id="technical" class="technical-section section-width">
-        <div><span class="section-kicker">Built for auditability</span><h2>Small surface. Explicit trust boundary.</h2></div>
-        <div class="technical-copy"><p>NimbusPact keeps the consensus-critical question inside the Intelligent Contract: did the selected metric cross the selected threshold during the selected window? Inputs are bounded, evidence is normalized deterministically, and the final digest is stored with the result.</p><div class="technical-pills"><span><Code2 :size="14" /> Strict equality consensus</span><span><Database :size="14" /> No backend or oracle server</span><span><Fingerprint :size="14" /> SHA-256 evidence digest</span></div></div>
+        <div class="technical-heading">
+          <span class="section-kicker">Trust boundary</span>
+          <h2>The contract decides.<br /><em>The source is still external.</em></h2>
+        </div>
+        <div class="technical-copy">
+          <p>
+            NimbusPact keeps the consensus-critical threshold decision inside the Intelligent Contract. Inputs are bounded,
+            weather values are normalized deterministically, and a SHA-256 digest is stored with the result. The digest proves
+            integrity against the normalized evidence used by the validators; it does not cryptographically authenticate Open-Meteo or guarantee that provider’s truth.
+          </p>
+          <div class="technical-pills">
+            <span><Code2 :size="14" /> strict_eq consensus</span>
+            <span><Database :size="14" /> no project backend</span>
+            <span><Fingerprint :size="14" /> SHA-256 commitment</span>
+          </div>
+        </div>
       </section>
     </main>
 
-    <footer class="footer section-width"><span>© 2026 NimbusPact</span><span>Project contribution · Parametric weather coverage</span><a href="https://github.com/GIFTEDLOV/genlayer-weather-oracle" target="_blank" rel="noreferrer">Provenance & sources <ArrowUpRight :size="13" /></a></footer>
+    <footer class="footer">
+      <div class="section-width footer-inner">
+        <div><span class="brand footer-brand"><span class="brand-mark"><CloudRain :size="17" /></span><span>NimbusPact</span></span><p>Parametric weather cover with finalized GenLayer settlement.</p></div>
+        <div class="footer-links"><a href="#coverage">Coverage</a><a href="#technical">Trust model</a><a href="https://github.com/GIFTEDLOV/nimbuspact" target="_blank" rel="noreferrer">GitHub <ArrowUpRight :size="12" /></a></div>
+        <div class="footer-meta"><span>Testnet Bradbury</span><span>Contract 0xEAA6…C934</span><span>© 2026 NimbusPact</span></div>
+      </div>
+    </footer>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, CircleCheck, CloudLightning, CloudRain, CloudSun, Clock3, Code2, Database, Fingerprint, HandCoins, LoaderCircle, LockKeyhole, Radar, RefreshCw, ShieldCheck, UserRound, WalletCards } from "lucide-vue-next";
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, CircleCheck, CloudRain, CloudSun, Clock3, Code2, Database, Fingerprint, HandCoins, LoaderCircle, LockKeyhole, Radar, RefreshCw, ShieldCheck, UserRound, WalletCards } from "lucide-vue-next";
 import { claimPayout, connectWallet, createPolicy, getContractAddress, getNetworkLabel, getPendingTransactions, getPolicies, recoverPendingTransactions, resolvePolicy, type NoticeKind, type Policy, type PolicyInput } from "./lib/nimbuspact";
 import { policyStatusMessage } from "./lib/receiptStatus";
 
@@ -161,7 +299,10 @@ start.setDate(start.getDate() - 6);
 const form = ref<PolicyInput>({ locationName: "Lagos Island", latitude: "6.5244", longitude: "3.3792", startDate: dateString(start), endDate: dateString(end), triggerType: "HEAVY_RAIN", threshold: "50", beneficiary: "", payout: "0.25" });
 
 const thresholdUnit = computed(() => form.value.triggerType === "HEAVY_RAIN" ? "mm" : form.value.triggerType === "EXTREME_HEAT" ? "°C" : "km/h");
-const totalFunded = computed(() => `${policies.value.reduce((total, policy) => total + Number(formatGen(policy.payout_amount)), 0).toFixed(2)} GEN`);
+const lockedCollateral = computed(() => {
+  const total = policies.value.reduce((sum, policy) => policy.withdrawn ? sum : sum + BigInt(policy.payout_amount || "0"), 0n);
+  return `${formatGen(total.toString())} GEN`;
+});
 
 function shortAddress(address: string): string { return address ? `${address.slice(0, 6)}…${address.slice(-4)}` : "Not set"; }
 function shortHash(hash: string): string { return hash ? `${hash.slice(0, 10)}…` : "not available"; }
@@ -173,6 +314,10 @@ function statusClass(status: string): string { return `status-${status.toLowerCa
 function resultTitle(policy: Policy): string { return policy.status === "TRIGGERED" || policy.status === "CLAIMED" ? "Weather trigger confirmed" : policy.status === "NOT_TRIGGERED" ? "Threshold not crossed" : policy.status === "DATA_UNAVAILABLE" ? "Evidence unavailable" : "Awaiting resolution"; }
 function resultDescription(policy: Policy): string { return policyStatusMessage(policy.status); }
 function showNotice(kind: NoticeKind, message: string): void { notice.value = { kind, message }; }
+function resolutionWindowClosed(policy: Policy): boolean {
+  const closeTime = Date.parse(`${policy.end_date}T23:59:59Z`);
+  return Number.isFinite(closeTime) && Date.now() > closeTime;
+}
 
 async function handleWallet(): Promise<void> {
   if (walletAddress.value) return;
@@ -196,8 +341,9 @@ async function submitCreate(): Promise<void> {
   finally { busy.value = false; recovery.value = getPendingTransactions(); }
 }
 async function resolve(policy: Policy): Promise<void> {
+  if (!resolutionWindowClosed(policy)) { showNotice("warning", `Wait until ${policy.end_date} has fully closed in UTC before resolving. Resolving too early can permanently record DATA_UNAVAILABLE in this deployed version.`); return; }
   busy.value = true;
-  try { const result = await resolvePolicy(policy.policy_id, walletAddress.value || ""); policies.value = await getPolicies(); selectedPolicy.value = result; showNotice(result.status === "TRIGGERED" ? "success" : result.status === "DATA_UNAVAILABLE" ? "warning" : "success", result.status === "TRIGGERED" ? "Validators finalized a triggered result. The payout is now claimable by the beneficiary." : result.status === "DATA_UNAVAILABLE" ? "The source was unavailable or malformed. No positive trigger was recorded." : "Validators finalized a non-triggered result. No payout is due."); }
+  try { const result = await resolvePolicy(policy.policy_id, walletAddress.value || ""); policies.value = await getPolicies(); selectedPolicy.value = result; showNotice(result.status === "TRIGGERED" ? "success" : result.status === "DATA_UNAVAILABLE" ? "warning" : "success", result.status === "TRIGGERED" ? "Validators finalized a triggered result. The payout is now claimable by the beneficiary." : result.status === "DATA_UNAVAILABLE" ? "The source was unavailable or malformed. No positive trigger was recorded." : "Validators finalized a non-triggered result. No beneficiary payout is due."); }
   catch (error) { showNotice("error", error instanceof Error ? error.message : "Resolution did not finalize successfully."); }
   finally { busy.value = false; recovery.value = getPendingTransactions(); }
 }
