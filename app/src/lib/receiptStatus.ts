@@ -169,9 +169,9 @@ export function classifyLifecycleError(error: unknown, hash: string): LifecycleO
 }
 
 export function policyStatusMessage(status: string): string {
-  if (status === "DATA_UNAVAILABLE") return "The weather source was unavailable or malformed. NimbusPact failed closed and recorded no positive trigger.";
+  if (status === "DATA_UNAVAILABLE") return "The weather source was unavailable or malformed, so NimbusPact failed closed and recorded no positive trigger. In this deployed Bradbury version the result is terminal and the committed GEN has no creator refund path.";
   if (status === "CLAIMED") return "Validators finalized a triggered result and the funded payout has been claimed by the beneficiary.";
   if (status === "TRIGGERED") return "Validators finalized a triggered result. The funded payout is claimable by the beneficiary.";
-  if (status === "NOT_TRIGGERED") return "Validators finalized a non-triggered result. No payout is due.";
-  return "Resolve this active policy to ask validators to inspect its fixed evidence source.";
+  if (status === "NOT_TRIGGERED") return "Validators finalized a non-triggered result. No beneficiary payout is due, and this deployed Bradbury version has no creator refund path for the committed GEN.";
+  return "Resolve this active policy after its observation window closes to ask validators to inspect its fixed evidence source.";
 }
