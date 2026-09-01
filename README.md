@@ -59,6 +59,11 @@ The tracked example targets the verified Bradbury deployment. Connect a wallet o
 
 The concise tracked evidence record is [`docs/live-proof/bradbury-smoke.json`](docs/live-proof/bradbury-smoke.json). Raw runtime receipts are kept out of source control and are not force-added as a release artifact.
 
+- GitHub repository: https://github.com/GIFTEDLOV/nimbuspact
+- Public application: https://nimbuspact.vercel.app
+- Release branch: `master`
+- Release base commit: `9127a4e5f1cfe6cf3dfb6110d2c19300244ce2b`
+
 | Step | Transaction hash | Final status | Execution | Consensus / finalized state |
 | --- | --- | --- | --- | --- |
 | Deployment | `0xf02ddbb1fa117ad1dbbabf32dfc41f912fb7d4ac42eda77e9f5130c8186610db` | `FINALIZED / 7` | `FINISHED_WITH_RETURN` | `AGREE`, 5/5 |
