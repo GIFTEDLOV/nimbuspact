@@ -164,6 +164,7 @@ function validatePolicyInput(input: PolicyInput, walletAddress: string): { input
     EXTREME_HEAT: [-100, 100],
     SEVERE_STORM: [0, 500],
   };
+  if (!Object.prototype.hasOwnProperty.call(thresholdBounds, input.triggerType)) throw new Error("Unsupported trigger type.");
   const [minimum, maximum] = thresholdBounds[input.triggerType];
   if (threshold < minimum || threshold > maximum) throw new Error(`Threshold for ${input.triggerType} must be between ${minimum} and ${maximum}.`);
 

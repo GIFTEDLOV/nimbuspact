@@ -1,5 +1,24 @@
 # NimbusPact
 
+> Parametric weather cover where GenLayer consensus turns a fixed public weather observation into a finalized payout decision.
+
+[![CI](https://github.com/GIFTEDLOV/nimbuspact/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/GIFTEDLOV/nimbuspact/actions/workflows/ci.yml) [![Network: Testnet Bradbury](https://img.shields.io/badge/network-Testnet%20Bradbury-7dff5b.svg)](https://www.genlayer.com/)
+
+![NimbusPact landing page showing the finalized weather-cover proof snapshot and direct policy workspace](docs/assets/screenshots/nimbuspact-landing.png)
+
+## Live links
+
+| Surface | Verified value |
+| --- | --- |
+| Application | [nimbuspact.vercel.app](https://nimbuspact.vercel.app) |
+| Repository | [github.com/GIFTEDLOV/nimbuspact](https://github.com/GIFTEDLOV/nimbuspact) |
+| Network | Testnet Bradbury (`testnetBradbury`) |
+| RPC | [`rpc-bradbury.genlayer.com`](https://rpc-bradbury.genlayer.com) |
+| Intelligent Contract | `0xEAA6Cb19AcB1E81e729224c590a5Cd5060D0c934` |
+| Live proof | [`docs/live-proof/bradbury-smoke.json`](docs/live-proof/bradbury-smoke.json) |
+
+This release is Testnet Bradbury only. It is not mainnet insurance coverage, and no external organization is represented as having audited or certified NimbusPact.
+
 ## 1. Product
 
 NimbusPact is a parametric weather-cover application on GenLayer. A policy creator funds a stated payout for a bounded weather condition, GenLayer validators independently fetch the same fixed public weather source, and the Intelligent Contract deterministically records whether the configured threshold was crossed. A beneficiary can claim only after a triggered result reaches successful finalized state.
@@ -18,7 +37,13 @@ A claimant, application frontend, project backend, weather-data submitter, or si
 
 NimbusPact moves that decision boundary into a GenLayer Intelligent Contract. The contract fixes the policy terms and evidence request, validators independently execute the external-data inspection, and GenLayer consensus determines the finalized contract state from which settlement eligibility follows.
 
-## 3. Why GenLayer
+## 3. The solution
+
+NimbusPact makes the policy terms explicit before money moves: a location, a bounded observation window, one supported metric, a threshold, a beneficiary and an exact GEN payout. The deployed Intelligent Contract owns the trigger decision and the payout gate; the frontend is a transparent client for reads, wallet requests and transaction recovery.
+
+That separation matters. A project operator can present the interface, but cannot edit a funded policy's weather terms or mark it triggered. A beneficiary can claim only from the finalized `TRIGGERED` state, and a second claim is rejected after `CLAIMED` / `withdrawn=true`.
+
+## 4. Why GenLayer
 
 The policy decision depends on data outside the chain. NimbusPact uses GenLayer's nondeterministic web access inside the Intelligent Contract to fetch the fixed Open-Meteo Archive request and `gl.eq_principle.strict_eq` to require equivalent validator output.
 
@@ -32,7 +57,7 @@ GenLayer is therefore central to the product workflow: validators independently 
 
 Consensus is not treated as source authentication. Open-Meteo remains an external dependency; validator agreement establishes agreement over the evidence they received and the contract's interpretation of it, not cryptographic proof that the provider is truthful or that the provider authored the data.
 
-## 4. How it works
+## 5. Product walkthrough
 
 1. A policy creator chooses a location label, latitude, longitude, observation window, supported weather trigger, threshold, beneficiary, and payout amount.
 2. `create_policy` validates and canonicalizes those fields. The payable call must fund the contract with exactly the stated payout amount.
@@ -45,7 +70,37 @@ Consensus is not treated as source authentication. Open-Meteo remains an externa
 
 The public frontend also blocks its Resolve control until the policy's observation end date has fully closed in UTC. This is a user-interface safeguard; the deployed contract itself does not independently know whether wall-clock observation time has completed.
 
-## 5. Architecture
+### Lifecycle and recovery
+
+The UI exposes the live Bradbury policy list and policy detail, including the evidence URL, evidence digest, observed value, resolution result, beneficiary and payout state. Each write follows:
+
+`PRECONDITION READ -> BROADCAST ONCE -> SAVE HASH -> RECONCILE THE SAME HASH -> REQUIRE FINALIZED + FINISHED_WITH_RETURN -> READ EXPECTED STATE`
+
+`ACCEPTED` is provisional. Refreshes, polling timeouts and ambiguous network interruptions keep the original transaction hash recoverable; the frontend does not automatically rebroadcast a replacement transaction.
+
+The representative live proof uses `p-1`: create, resolve, then beneficiary claim. The application does not fabricate that policy into the live policy list; its hero proof snapshot is a clearly labelled release-evidence summary, while the policy desk reads the deployed contract directly.
+
+## 6. Trigger model
+
+The deployed contract supports exactly three trigger types. It reads the corresponding UTC daily Open-Meteo field for every date in the inclusive observation window, takes the maximum, and triggers when `observed maximum >= threshold`.
+
+| Trigger type | Stored metric | Open-Meteo daily field | Threshold bounds |
+| --- | --- | --- | ---: |
+| `HEAVY_RAIN` | `PRECIPITATION_MM` | `precipitation_sum` | 0 to 1000 mm |
+| `EXTREME_HEAT` | `TEMPERATURE_MAX_C` | `temperature_2m_max` | -100 to 100 C |
+| `SEVERE_STORM` | `WIND_MAX_KMH` | `wind_speed_10m_max` | 0 to 500 km/h |
+
+Coordinates are canonicalized to four decimal places and thresholds to three decimal places. Dates must be valid `YYYY-MM-DD` values from 2000 through 2100. The inclusive observation window is at most 31 days.
+
+## 7. Evidence model
+
+The Intelligent Contract builds the Open-Meteo Archive API request from the stored canonical latitude, longitude, start date and end date. The request fixes `daily=precipitation_sum,temperature_2m_max,wind_speed_10m_max` and `timezone=UTC`. Every validator independently performs the nondeterministic HTTP read; the contract's validation and normalization after the read are deterministic.
+
+The response must be HTTP 200 JSON with numeric source coordinates within 0.5 degrees, a `daily.time` array and the requested metric array, exactly the expected number of dates, every requested date present, and values inside the metric bounds. The normalized evidence records provider, fixed URL, canonical coordinates/dates, metric and three-decimal daily values. `strict_eq` requires equivalent structured decisions and normalized evidence before the state transition is accepted.
+
+The contract stores a SHA-256 digest of the normalized evidence. This is an integrity commitment to the decision payload, not a provider signature. Validator agreement does not cryptographically authenticate Open-Meteo, prove that Open-Meteo authored the response, or remove source availability/concentration risk. Request failures, non-200 responses, invalid JSON or shape, coordinate/date mismatches, and out-of-bounds values become `DATA_UNAVAILABLE`.
+
+## 8. Architecture
 
 - `contracts/nimbuspact.py` — deployed consensus-critical policy, evidence, resolution, and payout state machine.
 - `app/` — Vue/Vite frontend using `genlayer-js` for direct reads and connected-wallet writes.
@@ -69,7 +124,7 @@ There is no NimbusPact project backend, database, or custom oracle server in the
 
 The deployed contract source is intentionally frozen. UI, documentation, and release-hardening changes must not silently change `contracts/nimbuspact.py`; CI verifies the tracked source hash against the live-proof record.
 
-## 6. How to use
+## 9. How to use
 
 Install the pinned dependencies and run the full local release checks:
 
@@ -99,7 +154,7 @@ Every write follows the same recovery discipline:
 
 `ACCEPTED` is provisional. A polling timeout, refresh, or ambiguous network interruption does not cause an automatic replacement transaction; the saved original hash remains available through **Check again**.
 
-## 7. Live proof
+## 10. Verified Bradbury proof
 
 The concise tracked evidence record is [`docs/live-proof/bradbury-smoke.json`](docs/live-proof/bradbury-smoke.json). Raw runtime receipts are intentionally not force-added to source control.
 
@@ -118,7 +173,7 @@ A prior reverted EVM-wrapper claim attempt is preserved rather than hidden:
 
 It is disclosed historical failure evidence and is **not** counted as a successful live-proof transaction.
 
-## 8. Security / trust model
+## 11. Security / trust model
 
 NimbusPact separates deterministic business rules from external-data consensus.
 
@@ -154,7 +209,7 @@ CI runs contract lint/semantic validation, direct contract tests, frontend lifec
 - the README's documented public method surface matches the public methods declared by the contract;
 - the live-proof record remains internally consistent with the finalized successful deployment and claimed representative policy.
 
-## 9. Limitations
+## 12. Known limitations
 
 These are limitations of the **currently deployed Bradbury v1**, not hidden roadmap items:
 
@@ -169,7 +224,7 @@ These are limitations of the **currently deployed Bradbury v1**, not hidden road
 
 Fixing the refund/retry economics would require a new contract version and a new deployment/live-proof chain. NimbusPact deliberately does not alter the already proven deployment while presenting a different source file as if it were the deployed contract.
 
-## 10. Developer / API details
+## 13. Developer / API details
 
 Public contract methods:
 
@@ -198,3 +253,11 @@ Environment variables are public configuration only:
 No private key, mnemonic, API token, or wallet credential belongs in the repository or frontend build.
 
 NimbusPact is MIT-licensed; see [`LICENSE`](LICENSE).
+
+## 14. Release / provenance
+
+The frozen deployed contract source is [`contracts/nimbuspact.py`](contracts/nimbuspact.py) with SHA-256 `1a6386e22ffc60d8beae3640569bf25ec6582c7896bb565bb1b161b96810e310`. The tracked proof and release-integrity test bind that source hash to the deployed address and deployment transaction.
+
+The successful Bradbury smoke is live-proven. Contract unit tests, frontend lifecycle tests, typechecking and the production build are tested locally and in CI, but a passing test is not additional live-chain proof. The prior reverted wrapper attempt remains disclosed in the proof record and is not counted as success.
+
+The current production release is the `master` branch published at the repository link above. Exact commit provenance is available in Git history and in the release commit reported with the submission package.
