@@ -24,6 +24,10 @@ const chainMeta: Record<NetworkKey, { label: string; chainId: number; rpc: strin
   testnetAsimov: { label: "Testnet Asimov", chainId: 4221, rpc: "https://rpc-asimov.genlayer.com" },
   testnetBradbury: { label: "Testnet Bradbury", chainId: 4221, rpc: "https://rpc-bradbury.genlayer.com" },
 };
+const zeroAddress = "0x0000000000000000000000000000000000000000";
+const decimalPattern = /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)$/;
+const addressPattern = /^0x[0-9a-fA-F]{40}$/;
+const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 
 function readClient() {
   return createClient({ chain: chainConfig, ...(rpcUrl ? { endpoint: rpcUrl } : {}) });
@@ -31,6 +35,7 @@ function readClient() {
 function writeClient(address: string): WalletClient {
   const provider = window.ethereum;
   if (!provider) throw new Error("No browser wallet was found. Install a wallet such as MetaMask and try again.");
+  if (!addressPattern.test(address) || address.toLowerCase() === zeroAddress) throw new Error("Connect a valid non-zero wallet address before submitting a transaction.");
   return createClient({ chain: chainConfig, account: address as `0x${string}`, provider }) as unknown as WalletClient;
 }
 function record(value: unknown): UnknownRecord {
@@ -116,6 +121,68 @@ function parseGen(value: string): bigint {
   if (wei <= 0n) throw new Error("Payout must be greater than zero.");
   return wei;
 }
+function parseDecimal(value: string, label: string): number {
+  const cleaned = value.trim();
+  if (!decimalPattern.test(cleaned)) throw new Error(`${label} must be a plain decimal number.`);
+  const numeric = Number(cleaned);
+  if (!Number.isFinite(numeric)) throw new Error(`${label} must be a finite decimal number.`);
+  return numeric;
+}
+function parseDateUtc(value: string, label: string): number {
+  if (!datePattern.test(value)) throw new Error(`${label} must use YYYY-MM-DD.`);
+  const [year, month, day] = value.split("-").map(Number);
+  if (year < 2000 || year > 2100) throw new Error(`${label} year must be between 2000 and 2100.`);
+  const timestamp = Date.UTC(year, month - 1, day);
+  const parsed = new Date(timestamp);
+  if (parsed.getUTCFullYear() !== year || parsed.getUTCMonth() !== month - 1 || parsed.getUTCDate() !== day) throw new Error(`${label} is not a valid calendar date.`);
+  return timestamp;
+}
+function validateAddress(address: string, label: string): string {
+  const cleaned = address.trim();
+  if (!addressPattern.test(cleaned)) throw new Error(`${label} must be a valid 20-byte EVM address.`);
+  if (cleaned.toLowerCase() === zeroAddress) throw new Error(`${label} cannot be the zero address.`);
+  return cleaned;
+}
+function validatePolicyInput(input: PolicyInput, walletAddress: string): { input: PolicyInput; payoutWei: bigint } {
+  const locationName = input.locationName.trim();
+  if (locationName.length < 1 || locationName.length > 64 || /[\r\n]/.test(locationName)) throw new Error("Location name must be 1-64 characters without line breaks.");
+
+  const latitude = parseDecimal(input.latitude, "Latitude");
+  const longitude = parseDecimal(input.longitude, "Longitude");
+  if (latitude < -90 || latitude > 90) throw new Error("Latitude must be between -90 and 90.");
+  if (longitude < -180 || longitude > 180) throw new Error("Longitude must be between -180 and 180.");
+
+  const startMs = parseDateUtc(input.startDate, "Observation start");
+  const endMs = parseDateUtc(input.endDate, "Observation end");
+  if (endMs < startMs) throw new Error("Observation end must not precede observation start.");
+  const inclusiveDays = Math.floor((endMs - startMs) / 86_400_000) + 1;
+  if (inclusiveDays > 31) throw new Error("Observation window cannot exceed 31 days.");
+
+  const threshold = parseDecimal(input.threshold, "Threshold");
+  const thresholdBounds: Record<TriggerType, [number, number]> = {
+    HEAVY_RAIN: [0, 1000],
+    EXTREME_HEAT: [-100, 100],
+    SEVERE_STORM: [0, 500],
+  };
+  const [minimum, maximum] = thresholdBounds[input.triggerType];
+  if (threshold < minimum || threshold > maximum) throw new Error(`Threshold for ${input.triggerType} must be between ${minimum} and ${maximum}.`);
+
+  const creator = validateAddress(walletAddress, "Connected wallet");
+  const beneficiary = validateAddress(input.beneficiary || creator, "Beneficiary");
+  const payoutWei = parseGen(input.payout);
+  return {
+    input: {
+      ...input,
+      locationName,
+      latitude: input.latitude.trim(),
+      longitude: input.longitude.trim(),
+      threshold: input.threshold.trim(),
+      beneficiary,
+      payout: input.payout.trim(),
+    },
+    payoutWei,
+  };
+}
 
 export function getContractAddress(): string { return contractAddress; }
 export function getNetworkLabel(): string { return chainMeta[networkKey].label; }
@@ -127,6 +194,7 @@ export async function connectWallet(): Promise<string> {
     const accounts = await provider.request({ method: "eth_requestAccounts" });
     const address = Array.isArray(accounts) && typeof accounts[0] === "string" ? accounts[0] : "";
     if (!address) throw new Error("The wallet returned no account.");
+    validateAddress(address, "Connected wallet");
     await ensureNetwork(writeClient(address));
     return address;
   } catch (error) { throw new Error(formatNetworkError(error)); }
@@ -166,15 +234,28 @@ export async function recoverPendingTransactions(): Promise<RecoveryMessage[]> {
   return messages;
 }
 export async function createPolicy(input: PolicyInput, walletAddress: string): Promise<Policy> {
-  const payoutWei = parseGen(input.payout);
-  const entry: PendingTransaction = { actionKey: createActionKey(walletAddress, input), hash: "", label: "Policy funding", createdAt: Date.now() };
-  return runLifecycle(entry, async () => { const existing = await getPolicies(); return existing.find((policy) => samePolicy(policy, input, walletAddress, payoutWei.toString())) || null; }, async () => { const client = writeClient(walletAddress); await ensureNetwork(client); return client.writeContract({ address: contractAddress, functionName: "create_policy", args: [input.locationName, input.latitude, input.longitude, input.startDate, input.endDate, input.triggerType, input.threshold, input.beneficiary || walletAddress, payoutWei], value: payoutWei }); }, async () => { const policies = await getPolicies(); const match = policies.find((policy) => samePolicy(policy, input, walletAddress, payoutWei.toString())); if (!match) throw new Error("The funding transaction finalized, but the expected policy state was not found."); return match; });
+  const validated = validatePolicyInput(input, walletAddress);
+  const normalized = validated.input;
+  const payoutWei = validated.payoutWei;
+  const entry: PendingTransaction = { actionKey: createActionKey(walletAddress, normalized), hash: "", label: "Policy funding", createdAt: Date.now() };
+  return runLifecycle(
+    entry,
+    async () => { const existing = await getPolicies(); return existing.find((policy) => samePolicy(policy, normalized, walletAddress, payoutWei.toString())) || null; },
+    async () => {
+      const client = writeClient(walletAddress);
+      await ensureNetwork(client);
+      return client.writeContract({ address: contractAddress, functionName: "create_policy", args: [normalized.locationName, normalized.latitude, normalized.longitude, normalized.startDate, normalized.endDate, normalized.triggerType, normalized.threshold, normalized.beneficiary, payoutWei], value: payoutWei });
+    },
+    async () => { const policies = await getPolicies(); const match = policies.find((policy) => samePolicy(policy, normalized, walletAddress, payoutWei.toString())); if (!match) throw new Error("The funding transaction finalized, but the expected policy state was not found."); return match; },
+  );
 }
 export async function resolvePolicy(policyId: string, walletAddress: string): Promise<Policy> {
+  validateAddress(walletAddress, "Connected wallet");
   const entry: PendingTransaction = { actionKey: `resolve:${policyId}`, hash: "", label: `${policyId} resolution`, createdAt: Date.now() };
   return runLifecycle(entry, async () => { const policy = await getPolicy(policyId); if (policy.status !== "ACTIVE") throw new Error("This policy has already been resolved. Refresh the policy state before trying again."); return null; }, async () => { const client = writeClient(walletAddress); await ensureNetwork(client); return client.writeContract({ address: contractAddress, functionName: "resolve_policy", args: [policyId], value: 0n }); }, async () => getPolicy(policyId));
 }
 export async function claimPayout(policyId: string, walletAddress: string): Promise<Policy> {
+  validateAddress(walletAddress, "Connected wallet");
   const entry: PendingTransaction = { actionKey: `claim:${policyId}`, hash: "", label: `${policyId} payout claim`, createdAt: Date.now() };
   return runLifecycle(entry, async () => { const policy = await getPolicy(policyId); if (policy.status !== "TRIGGERED" || policy.withdrawn) throw new Error("This payout is not currently claimable."); if (policy.beneficiary.toLowerCase() !== walletAddress.toLowerCase()) throw new Error("Connect the beneficiary wallet to claim this payout."); return null; }, async () => { const client = writeClient(walletAddress); await ensureNetwork(client); return client.writeContract({ address: contractAddress, functionName: "claim_payout", args: [policyId], value: 0n }); }, async () => getPolicy(policyId));
 }
