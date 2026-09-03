@@ -6,7 +6,7 @@ NimbusPact is a Testnet Bradbury demonstration, not mainnet insurance or a regul
 
 ## Release status
 
-The V2 source and controlled state-machine coverage are in this repository. Bradbury has accepted the single compatible V2 deployment below; finalization and the browser funding proof remain release gates, so this README does not claim live funding until that evidence is recorded.
+The V2 source and controlled state-machine coverage are in this repository. Bradbury has finalized the single compatible V2 deployment below. The browser funding proof remains a release gate, so this README does not claim live funding until that evidence is recorded.
 
 | Surface | Value |
 | --- | --- |
@@ -14,7 +14,7 @@ The V2 source and controlled state-machine coverage are in this repository. Brad
 | Historical V1 application | [nimbuspact.vercel.app](https://nimbuspact.vercel.app) |
 | Target network | Testnet Bradbury |
 | RPC | `https://rpc-bradbury.genlayer.com` |
-| Current V2 contract | `0x055F97140CE35FD1e656ebb3D204952A46646681` (accepted; finalization pending) |
+| Current V2 contract | `0x055F97140CE35FD1e656ebb3D204952A46646681` (finalized) |
 | Current V2 app | Pending V2 funding proof |
 
 ## Changes after reviewer feedback
@@ -119,7 +119,7 @@ The preserved reverted wrapper transaction is `0xbe2fd099ec7f1b52db4a412bd2b5870
 
 The direct suite uses deterministic transaction timestamps and controlled weather responses to prove every V2 transition, including the 24-hour grace boundary. This is **controlled integration proof**, not a live weather assertion.
 
-The **LIVE BRADBURY PROOF** section below is intentionally empty until a new deployment is finalized and one funded policy is created through the public V2 browser flow with a funded test account. A CLI write or direct RPC call is not a substitute for that frontend proof.
+The **LIVE BRADBURY PROOF** section below is intentionally empty until one funded policy is created through the public V2 browser flow with a funded test account. A CLI write or direct RPC call is not a substitute for that frontend proof.
 
 ### LIVE BRADBURY PROOF
 
@@ -127,7 +127,7 @@ The **LIVE BRADBURY PROOF** section below is intentionally empty until a new dep
 | --- | --- |
 | New V2 contract | `0x055F97140CE35FD1e656ebb3D204952A46646681` |
 | Deployment transaction | `0xed523aaf12afa7633651f82f9ed1cafc0d133a1712faa5f48b57a7c5f1958d15` |
-| Deployment status | `ACCEPTED / FINISHED_WITH_RETURN / AGREE`; `FINALIZED` pending |
+| Deployment status | `FINALIZED / FINISHED_WITH_RETURN / AGREE` |
 | Preview / production URL | Pending |
 | Browser wallet | Pending |
 | Live create transaction | Pending |

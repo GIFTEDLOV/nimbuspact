@@ -136,4 +136,4 @@ def test_bradbury_compatibility_probe_is_recorded_without_claiming_live_v2():
     assert COMPATIBILITY["read_only_v2_probe"]["raw_fee_quote_error"]["details"] == "execution reverted"
     assert COMPATIBILITY["live_write"]["funding_attempt"] == "not_run"
     assert EXPECTED_V2_CONTRACT_ADDRESS in README
-    assert "finalization pending" in README.lower()
+    assert "finalized" in README.lower()

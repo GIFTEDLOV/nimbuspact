@@ -74,7 +74,7 @@
     "initial_cli_status": "ACCEPTED",
     "consensus_result": "AGREE",
     "execution_result": "FINISHED_WITH_RETURN",
-    "finalized_poll": "not yet reached; current protocol status remains ACCEPTED",
+    "finalized_poll": "FINALIZED",
     "initial_state": {
       "policy_count": 0,
       "policy_ids": []
@@ -82,7 +82,7 @@
   },
   "live_write": {
     "funding_attempt": "not_run",
-    "reason": "The V2 deployment was the single controlled Bradbury write. Browser funding was not attempted while the deployment remains ACCEPTED rather than FINALIZED; no duplicate funding or speculative retry was broadcast.",
+    "reason": "The V2 deployment was the single controlled Bradbury write. Browser funding was not attempted before the deployment finalized; no duplicate funding or speculative retry was broadcast.",
     "root_cause_status": "The exact rejected browser write object was not available to capture. The old V1 funding failure is not assigned a speculative single cause; the premature V2 fee-stack incompatibility is separately captured above."
   }
 }
