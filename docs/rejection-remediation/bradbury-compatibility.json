@@ -14,6 +14,35 @@
     "data_unavailable_recovery": "terminal in starting release; no retry or creator refund",
     "object_object_path": "starting formatter used String(error) for non-Error values"
   },
+  "read_only_bradbury_v1_compatibility": {
+    "sdk": "genlayer-js 1.1.8",
+    "rpc": "https://rpc-bradbury.genlayer.com",
+    "chain_id": 4221,
+    "historical_contract_read": {
+      "contract": "0xEAA6Cb19AcB1E81e729224c590a5Cd5060D0c934",
+      "policy_count": 1,
+      "policy_ids": ["p-1"],
+      "status": "CLAIMED",
+      "result": "PASS"
+    },
+    "v2_source_schema_preflight": {
+      "status": "PASS",
+      "payable_method": "create_policy",
+      "write_methods": ["create_policy", "resolve_policy", "claim_payout", "refund_policy"],
+      "read_methods": ["get_policy", "get_policies", "get_policy_ids", "get_policy_count"]
+    },
+    "gen_call_probe": {
+      "status": "PASS_TRANSPORT_EXPECTED_CONTRACT_USERERROR",
+      "method": "resolve_policy",
+      "reason": "The historical p-1 policy is already resolved; Bradbury returned the contract's expected user error through gen_call, proving the 1.1.8 call path reaches GenVM."
+    },
+    "payable_encoding": {
+      "status": "PASS_STATIC_AND_CLIENT_PATH",
+      "contract_schema_payable": true,
+      "frontend_write_field": "value",
+      "fee_parameters": "none"
+    }
+  },
   "read_only_v2_probe": {
     "sdk": "genlayer-js 2.0.0-rc.1 at 8bc7c73cf26e57473804bdd1caad17f99d49d4ae",
     "rpc": "https://rpc-bradbury.genlayer.com",
@@ -38,9 +67,22 @@
       "details_excerpt": "execution failed: genvm.VMResult; stderr: ValueError: call to private method Contract.__handle_undefined_method__; call to private method Contract.__receive__"
     }
   },
+  "v2_deployment": {
+    "source_sha256": "5c6cdf0db0ba5dcd3a5a33034f0bde29f2739334ce6d21ea46d47b1e0cb39513",
+    "transaction": "0xed523aaf12afa7633651f82f9ed1cafc0d133a1712faa5f48b57a7c5f1958d15",
+    "contract_address": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+    "initial_cli_status": "ACCEPTED",
+    "consensus_result": "AGREE",
+    "execution_result": "FINISHED_WITH_RETURN",
+    "finalized_poll": "not yet reached; current protocol status remains ACCEPTED",
+    "initial_state": {
+      "policy_count": 0,
+      "policy_ids": []
+    }
+  },
   "live_write": {
     "funding_attempt": "not_run",
-    "reason": "No browser wallet/test account was available in this environment, and the read-only fee-policy probe failed before signing. No GEN was spent on a speculative write.",
-    "root_cause_status": "The exact rejected browser write object was not available to capture. The current endpoint incompatibility is proven at fee estimation; the old V1 funding failure is not assigned a speculative single cause."
+    "reason": "The V2 deployment was the single controlled Bradbury write. Browser funding was not attempted while the deployment remains ACCEPTED rather than FINALIZED; no duplicate funding or speculative retry was broadcast.",
+    "root_cause_status": "The exact rejected browser write object was not available to capture. The old V1 funding failure is not assigned a speculative single cause; the premature V2 fee-stack incompatibility is separately captured above."
   }
 }

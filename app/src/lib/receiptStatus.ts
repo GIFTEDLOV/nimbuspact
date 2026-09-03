@@ -191,20 +191,17 @@ export function normalizeNetworkError(error: unknown): NormalizedNetworkError {
   if (code === 4902 || /wrong network|chain id|chainid|wallet.*network|network.*wallet|switch.*network|unsupported chain/.test(lower)) {
     return { headline: "Your wallet is on the wrong network. Switch to the configured GenLayer network and try again.", diagnostic };
   }
-  if (/quotegasprice|messagefeeparamsbudgetfloor|calculateroundfees|fee manager|fee policy.*unavailable|fee.*not.*supported/.test(lower)) {
-    return { headline: "This Bradbury endpoint is not exposing the compatible GenLayer fee policy. Do not sign; switch to the configured V2-compatible endpoint or ask the operator to upgrade the network stack.", diagnostic };
-  }
   if (/fee policy|fee-policy|stale quote|quote.*stale|policy.*mismatch|mismatch.*policy|price cap|cap.*price/.test(lower)) {
-    return { headline: "The network fee policy changed or the quote is stale. Refresh the live fee quote and sign again.", diagnostic };
+    return { headline: "The network fee policy changed or the request is stale. Refresh the page and sign again.", diagnostic };
   }
   if (/insufficient.*fee|fee.*insufficient|feevalue|fee value|protocol fee|fee deposit|not enough.*fee|execution budget/.test(lower)) {
-    return { headline: "The wallet needs more GEN for the separate protocol-fee deposit. Keep the escrow amount unchanged, refresh the quote, and try again.", diagnostic };
+    return { headline: "The wallet needs more GEN to submit this transaction. Keep the policy escrow amount unchanged and try again.", diagnostic };
   }
   if (/insufficient funds|insufficient wallet|balance.*low|not enough gen|not enough.*balance/.test(lower)) {
-    return { headline: "The wallet does not have enough GEN for the policy escrow plus the separate network-fee deposit.", diagnostic };
+    return { headline: "The wallet does not have enough GEN for the policy escrow and network transaction fee.", diagnostic };
   }
   if (code === 429 || /rate limit|too many requests|rpc admission|admission queue|temporarily unavailable/.test(lower)) {
-    return { headline: "Bradbury RPC admission is busy or rate-limited. Wait briefly, refresh the quote, and retry once.", diagnostic };
+    return { headline: "Bradbury RPC admission is busy or rate-limited. Wait briefly and retry once.", diagnostic };
   }
   if (/transaction canceled|transaction cancelled|cancelled|canceled/.test(lower)) {
     return { headline: "The transaction was canceled before finalization. Its saved hash remains available for reconciliation.", diagnostic };

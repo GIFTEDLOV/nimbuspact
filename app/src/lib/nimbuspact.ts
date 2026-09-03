@@ -1,5 +1,6 @@
 import { createClient } from "genlayer-js";
 import { localnet, studionet, testnetAsimov, testnetBradbury } from "genlayer-js/chains";
+import { TransactionStatus, type TransactionHash } from "genlayer-js/types";
 import {
   classifyLifecycleError,
   classifyReceipt,
@@ -60,14 +61,6 @@ export interface Policy {
   refunded: boolean;
 }
 
-export interface FeeQuote {
-  distribution: Record<string, bigint>;
-  messageAllocations?: Array<Record<string, unknown>>;
-  feeValue: bigint;
-  policy?: Record<string, unknown>;
-  observed?: Record<string, unknown>;
-}
-
 export interface ContractWriteRequest {
   address: string;
   functionName: string;
@@ -77,7 +70,6 @@ export interface ContractWriteRequest {
 
 export interface WalletClient {
   writeContract(options: Record<string, unknown>): Promise<string>;
-  estimateTransactionFeesForWrite(options: Record<string, unknown>): Promise<FeeQuote>;
   readContract(options: Record<string, unknown>): Promise<unknown>;
   waitForTransactionReceipt(options: Record<string, unknown>): Promise<unknown>;
   connect?: (network: string) => Promise<void>;
@@ -210,11 +202,11 @@ function releaseSubmissionLock(error: unknown): boolean {
   const message = errorText(error).toLowerCase();
   return code === 4001
     || code === 4902
-    || /user rejected|user denied|rejected the request|request rejected|wrong network|unsupported chain|insufficient funds|insufficient.*fee|fee policy.*mismatch|fee manager|quotegasprice|messagefeeparamsbudgetfloor|calculateroundfees|funding must exactly equal|value mismatch|execution reverted|contract.*revert|usererror|user error/.test(message);
+    || /user rejected|user denied|rejected the request|request rejected|wrong network|unsupported chain|insufficient funds|insufficient.*fee|fee policy.*mismatch|funding must exactly equal|value mismatch|execution reverted|contract.*revert|usererror|user error/.test(message);
 }
 
 async function waitForFinalized(hash: string): Promise<unknown> {
-  return readClient().waitForTransactionReceipt({ hash, waitUntil: "finalized", interval: 3000, retries: 40, fullTransaction: true });
+  return readClient().waitForTransactionReceipt({ hash: hash as TransactionHash, status: TransactionStatus.FINALIZED, interval: 3000, retries: 40 });
 }
 
 async function ensureNetwork(client: WalletClient): Promise<void> {
@@ -383,51 +375,13 @@ function validatePolicyInput(input: PolicyInput, walletAddress: string): { input
   };
 }
 
-function normalizeFeeQuote(value: unknown): FeeQuote {
-  const raw = record(value);
-  const distributionRaw = record(raw.distribution);
-  const distribution: Record<string, bigint> = {};
-  for (const [key, item] of Object.entries(distributionRaw)) {
-    try { distribution[key] = BigInt(asString(item, "0")); } catch { distribution[key] = 0n; }
-  }
-  const allocations = Array.isArray(raw.messageAllocations) ? raw.messageAllocations.map((item) => record(item)) : undefined;
-  return {
-    distribution,
-    messageAllocations: allocations,
-    feeValue: BigInt(asString(raw.feeValue, "0")),
-    policy: record(raw.policy),
-    observed: record(raw.observed),
-  };
-}
-
-export function buildWriteOptions(request: ContractWriteRequest, feeQuote?: FeeQuote): Record<string, unknown> {
+export function buildWriteOptions(request: ContractWriteRequest): Record<string, unknown> {
   return {
     address: request.address,
     functionName: request.functionName,
     args: request.args,
     value: request.value,
-    ...(feeQuote ? {
-      fees: {
-        distribution: feeQuote.distribution,
-        ...(feeQuote.messageAllocations ? { messageAllocations: feeQuote.messageAllocations } : {}),
-        feeValue: feeQuote.feeValue,
-      },
-    } : {}),
   };
-}
-
-async function estimateWriteFees(client: WalletClient, walletAddress: string, request: ContractWriteRequest): Promise<FeeQuote> {
-  const estimate = await client.estimateTransactionFeesForWrite({
-    account: walletAddress as `0x${string}`,
-    ...request,
-  });
-  return normalizeFeeQuote(estimate);
-}
-
-async function writeWithFees(client: WalletClient, walletAddress: string, request: ContractWriteRequest, feeQuote?: FeeQuote): Promise<string> {
-  const quote = feeQuote || await estimateWriteFees(client, walletAddress, request);
-  if (quote.feeValue < 0n) throw new Error("The network returned an invalid negative fee quote.");
-  return client.writeContract(buildWriteOptions(request, quote));
 }
 
 export function getContractAddress(): string { return configuredContractAddress; }
@@ -476,18 +430,6 @@ export async function getPolicies(): Promise<Policy[]> {
 async function getPolicy(policyId: string): Promise<Policy> {
   const value = await readClient().readContract({ address: configuredContractAddress as `0x${string}`, functionName: "get_policy", args: [policyId] });
   return normalizePolicy(value, policyId);
-}
-
-export async function estimateCreateFeeQuote(input: PolicyInput, walletAddress: string): Promise<FeeQuote> {
-  const validated = validatePolicyInput(input, walletAddress);
-  const client = writeClient(walletAddress);
-  await ensureNetwork(client);
-  return estimateWriteFees(client, walletAddress, {
-    address: configuredContractAddress,
-    functionName: "create_policy",
-    args: [validated.input.locationName, validated.input.latitude, validated.input.longitude, validated.input.startDate, validated.input.endDate, validated.input.triggerType, validated.input.threshold, validated.input.beneficiary, validated.payoutWei],
-    value: validated.payoutWei,
-  });
 }
 
 export async function recoverPendingTransactions(): Promise<RecoveryMessage[]> {
@@ -539,7 +481,7 @@ export async function recoverPendingTransactions(): Promise<RecoveryMessage[]> {
   return messages;
 }
 
-export async function createPolicy(input: PolicyInput, walletAddress: string, feeQuote?: FeeQuote): Promise<Policy> {
+export async function createPolicy(input: PolicyInput, walletAddress: string): Promise<Policy> {
   const validated = validatePolicyInput(input, walletAddress);
   const normalized = validated.input;
   const payoutWei = validated.payoutWei;
@@ -560,7 +502,7 @@ export async function createPolicy(input: PolicyInput, walletAddress: string, fe
   return runLifecycle(
     entry,
     async () => { const existing = await getPolicies(); return existing.find((policy) => samePolicy(policy, normalized, walletAddress, payoutWei.toString())) || null; },
-    async () => { const client = writeClient(walletAddress); await ensureNetwork(client); return writeWithFees(client, walletAddress, request, feeQuote); },
+    async () => { const client = writeClient(walletAddress); await ensureNetwork(client); return client.writeContract(buildWriteOptions(request)); },
     async () => { const policies = await getPolicies(); const match = policies.find((policy) => samePolicy(policy, normalized, walletAddress, payoutWei.toString())); if (!match) throw new Error("The funding transaction finalized, but the expected policy state was not found."); return match; },
   );
 }
@@ -582,7 +524,7 @@ export async function resolvePolicy(policyId: string, walletAddress: string): Pr
     async () => {
       const client = writeClient(walletAddress);
       await ensureNetwork(client);
-      return writeWithFees(client, walletAddress, { address: configuredContractAddress, functionName: "resolve_policy", args: [policyId], value: 0n });
+      return client.writeContract(buildWriteOptions({ address: configuredContractAddress, functionName: "resolve_policy", args: [policyId], value: 0n }));
     },
     async () => getPolicy(policyId),
   );
@@ -594,7 +536,7 @@ export async function claimPayout(policyId: string, walletAddress: string): Prom
   return runLifecycle(
     entry,
     async () => { const policy = await getPolicy(policyId); if (policy.status !== "TRIGGERED" || policy.withdrawn || policy.refunded) throw new Error("This payout is not currently claimable."); if (policy.beneficiary.toLowerCase() !== walletAddress.toLowerCase()) throw new Error("Connect the beneficiary wallet to claim this payout."); return null; },
-    async () => { const client = writeClient(walletAddress); await ensureNetwork(client); return writeWithFees(client, walletAddress, { address: configuredContractAddress, functionName: "claim_payout", args: [policyId], value: 0n }); },
+    async () => { const client = writeClient(walletAddress); await ensureNetwork(client); return client.writeContract(buildWriteOptions({ address: configuredContractAddress, functionName: "claim_payout", args: [policyId], value: 0n })); },
     async () => getPolicy(policyId),
   );
 }
@@ -605,7 +547,7 @@ export async function refundPolicy(policyId: string, walletAddress: string): Pro
   return runLifecycle(
     entry,
     async () => { const policy = await getPolicy(policyId); if (!canRefundPolicy(policy, walletAddress)) throw new Error("Refund is not eligible for this policy or connected wallet."); return null; },
-    async () => { const client = writeClient(walletAddress); await ensureNetwork(client); return writeWithFees(client, walletAddress, { address: configuredContractAddress, functionName: "refund_policy", args: [policyId], value: 0n }); },
+    async () => { const client = writeClient(walletAddress); await ensureNetwork(client); return client.writeContract(buildWriteOptions({ address: configuredContractAddress, functionName: "refund_policy", args: [policyId], value: 0n })); },
     async () => getPolicy(policyId),
   );
 }

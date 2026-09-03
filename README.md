@@ -6,20 +6,20 @@ NimbusPact is a Testnet Bradbury demonstration, not mainnet insurance or a regul
 
 ## Release status
 
-The V2 source and controlled state-machine coverage are in this repository. A new compatible deployment and the browser funding proof are release gates; this README does not claim either until the transaction evidence is recorded below.
+The V2 source and controlled state-machine coverage are in this repository. Bradbury has accepted the single compatible V2 deployment below; finalization and the browser funding proof remain release gates, so this README does not claim live funding until that evidence is recorded.
 
 | Surface | Value |
 | --- | --- |
 | Repository | [github.com/GIFTEDLOV/nimbuspact](https://github.com/GIFTEDLOV/nimbuspact) |
 | Historical V1 application | [nimbuspact.vercel.app](https://nimbuspact.vercel.app) |
-| Target network | Testnet Bradbury after the matching v0.6 stack is promoted |
+| Target network | Testnet Bradbury |
 | RPC | `https://rpc-bradbury.genlayer.com` |
-| Current V2 contract | Pending separately finalized deployment |
+| Current V2 contract | `0x055F97140CE35FD1e656ebb3D204952A46646681` (accepted; finalization pending) |
 | Current V2 app | Pending V2 funding proof |
 
 ## Changes after reviewer feedback
 
-1. Live policy funding now has one coherent GenLayer V2 fee lifecycle implementation. The payable `value` is exactly the escrow payout, while the measured protocol-fee deposit is passed separately; V2 funding remains gated until the matching stack is available on Bradbury.
+1. Live policy funding now uses the proven Bradbury-compatible GenLayer client family (`genlayer-js ^1.1.8`). `create_policy` sends the exact payout as the payable `value`; no unsupported v0.6 fee parameters are added to the transaction.
 2. Wallet, RPC, fee, contract, consensus, and execution failures cross one recursive normalization boundary. Structured errors retain bounded diagnostics and never become an unreadable object string.
 3. The Intelligent Contract derives UTC observation boundaries from its deterministic transaction timestamp. It rejects retroactive creation and rejects early resolution on-chain.
 4. The escrow state machine now has `REFUNDED`, creator refunds for `NOT_TRIGGERED`, bounded retry for `DATA_UNAVAILABLE`, and a deterministic delayed fail-safe refund after the recovery grace period.
@@ -43,7 +43,7 @@ The frontend displays the same UTC boundary and disables early resolution as a u
 
 ## Escrow economics and state machine
 
-The creator sends exactly `payout_amount` as the payable call value. The protocol fee is a separate deposit estimated from the current fee policy and fee profile. The UI labels both amounts and shows the wallet requirement as `escrow + network deposit`; it never adds the fee deposit to escrow.
+The creator sends exactly `payout_amount` as the payable call value. Network transaction handling is separate from policy escrow: the frontend never adds a guessed or unsupported fee amount to `value`, and it clearly labels the exact escrow independently from the wallet's transaction fee.
 
 The state machine is:
 
@@ -80,34 +80,25 @@ Supported triggers:
 
 ## Frontend transaction flow
 
-The application uses the pinned GenLayer V2 release candidate at commit `8bc7c73cf26e57473804bdd1caad17f99d49d4ae`. Its write flow is:
+The application uses the proven Bradbury-compatible `genlayer-js ^1.1.8` release family. Its write flow is:
 
 ```text
-precondition read -> live fee estimate -> wallet signing -> broadcast once
+precondition read -> wallet signing with exact payable value -> broadcast once
 -> persist hash -> wait for FINALIZED -> require FINISHED_WITH_RETURN
 -> read expected contract state
 ```
 
 `ACCEPTED` is provisional. Polling timeouts and ambiguous interruptions preserve the original hash; the app reconciles it instead of broadcasting a replacement. If a wallet/RPC call returns no hash, a persistent action lock and exact-policy reconciliation prevent an automatic duplicate funding attempt. The error panel exposes a user-facing action and expandable technical diagnostics.
 
-## Network compatibility gate
+## Bradbury compatibility and fee handling
 
-The official v0.6 migration line is a coordinated release family: v2.0 RC `genlayer-js`, matching node/consensus, CLI, Studio, and fee-profile tooling. The current Bradbury endpoint was probed read-only during this remediation: its fee-manager quote calls reverted, and the V2 SDK could not read the historical V1 contract through the endpoint's legacy GenVM path. That evidence is recorded in [`docs/rejection-remediation/bradbury-compatibility.json`](docs/rejection-remediation/bradbury-compatibility.json). No V2 write or GEN spend was attempted after this incompatibility was established. The V2 frontend must be pointed at a matching promoted Bradbury stack before deployment or live funding proof.
+The release intentionally remains on the proven Bradbury V1-family client: `genlayer-js ^1.1.8`. A read-only check with that client against the historical contract returned its existing policy and count on chain. The V2/v0.6 fee-manager probe is preserved as rejected-path evidence in [`docs/rejection-remediation/bradbury-compatibility.json`](docs/rejection-remediation/bradbury-compatibility.json); it is not used by this Bradbury release. This avoids mixing an unreleased v0.6 fee lifecycle with a Bradbury V1-family transaction path.
 
 Authoritative references: [Transaction Context](https://docs.genlayer.com/developers/intelligent-contracts/features/transaction-context), [Value Transfers](https://docs.genlayer.com/developers/intelligent-contracts/features/value-transfers), [Fees and Transaction Policy](https://docs.genlayer.com/developers/decentralized-applications/fees-and-transaction-kit), [Fee Profiling and Estimation](https://docs.genlayer.com/developers/decentralized-applications/fee-profiling-and-estimation), [Transaction Kit Integration](https://docs.genlayer.com/developers/decentralized-applications/transaction-kit-integration), [Fee Outcomes and Debugging](https://docs.genlayer.com/developers/decentralized-applications/fee-outcomes-and-debugging), and [Consensus v0.6 Migration](https://docs.genlayer.com/developers/consensus-v06-migration).
 
 ## Fee profile and fee policy
 
-The official GenLayer fee model separates protocol fees from payable user value. A supported fee-profile run should measure these representative branches:
-
-- `create_policy`;
-- normal `resolve_policy`;
-- `resolve_policy` returning `DATA_UNAVAILABLE`;
-- retry to `TRIGGERED`;
-- `claim_payout` with its emitted transfer;
-- `refund_policy` with its emitted transfer.
-
-The installed local `gltest` in this workspace predates the `--fee-profile` option, so no fee constants are checked in or invented. The V2 frontend uses the SDK's live target-write estimator when the matching network exposes the fee policy, and deployment must use a supported fee-aware tool/profile before signing. When the compatible profiler is available, commit its generated profile and rerun it whenever the contract, GenVM, or fee policy changes.
+The v0.6 fee-profile workflow is deliberately not part of this Bradbury release. The installed Bradbury-compatible client does not expose that newer fee-profile lifecycle, so NimbusPact does not invent fee constants or pass `fees`, `feeValue`, `distribution`, or message-budget parameters. The payable contract value remains the exact policy escrow; ordinary network transaction fees remain distinct and are surfaced as transaction errors when the wallet cannot submit.
 
 ## Historical rejected V1 evidence
 
@@ -134,15 +125,15 @@ The **LIVE BRADBURY PROOF** section below is intentionally empty until a new dep
 
 | Evidence | Value |
 | --- | --- |
-| New V2 contract | Pending |
-| Deployment transaction | Pending |
-| Deployment status | Pending `FINALIZED / FINISHED_WITH_RETURN / AGREE` |
+| New V2 contract | `0x055F97140CE35FD1e656ebb3D204952A46646681` |
+| Deployment transaction | `0xed523aaf12afa7633651f82f9ed1cafc0d133a1712faa5f48b57a7c5f1958d15` |
+| Deployment status | `ACCEPTED / FINISHED_WITH_RETURN / AGREE`; `FINALIZED` pending |
 | Preview / production URL | Pending |
 | Browser wallet | Pending |
 | Live create transaction | Pending |
 | Live policy ID | Pending |
 | Escrow balance check | Pending |
-| Fee quote verification | Pending |
+| Exact escrow value sent | Pending |
 
 ## Local checks
 
@@ -180,10 +171,10 @@ The repository does not store private keys. Public frontend configuration uses `
 
 ## Repository layout
 
-- `docs/rejection-remediation/bradbury-compatibility.json` — read-only Bradbury/V2 compatibility evidence and raw error capture.
+- `docs/rejection-remediation/bradbury-compatibility.json` — read-only Bradbury compatibility evidence and preserved rejected V2 raw error capture.
 
 - `contracts/nimbuspact.py` — V2 consensus-critical policy, evidence, timing, retry, refund, and payout state machine.
-- `app/src/lib/nimbuspact.ts` — V2 client, exact payable value, live fee estimate, hash recovery, and policy actions.
+- `app/src/lib/nimbuspact.ts` — Bradbury-compatible V2 client, exact payable value, hash recovery, and policy actions.
 - `app/src/lib/receiptStatus.ts` — finality/execution classification and the single error-normalization boundary.
 - `tests/direct/test_nimbuspact.py` — deterministic V2 transition and economic regression coverage.
 - `tests/frontend/receipt_status.test.mjs` — receipt, structured-error, and escrow-versus-fee regressions.

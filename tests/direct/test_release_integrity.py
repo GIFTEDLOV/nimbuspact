@@ -17,6 +17,7 @@ EXPECTED_REJECTED_SOURCE_SHA256 = "1a6386e22ffc60d8beae3640569bf25ec6582c7896bb5
 EXPECTED_CONTRACT_ADDRESS = "0xEAA6Cb19AcB1E81e729224c590a5Cd5060D0c934"
 EXPECTED_DEPLOYMENT_HASH = "0xf02ddbb1fa117ad1dbbabf32dfc41f912fb7d4ac42eda77e9f5130c8186610db"
 EXPECTED_PRIOR_REVERTED_CLAIM = "0xbe2fd099ec7f1b52db4a412bd2b587006c237a6ccf6aa516467f430d695c6d6b"
+EXPECTED_V2_CONTRACT_ADDRESS = "0x055F97140CE35FD1e656ebb3D204952A46646681"
 
 CONTRACT = CONTRACT_PATH.read_text(encoding="utf-8")
 README = README_PATH.read_text(encoding="utf-8")
@@ -56,7 +57,7 @@ def test_historical_release_identity_remains_disclosed():
     assert "https://nimbuspact.vercel.app" in README
     assert "https://github.com/GIFTEDLOV/nimbuspact" in README
 
-    assert f'VITE_CONTRACT_ADDRESS=""' in ENV
+    assert f'VITE_CONTRACT_ADDRESS="{EXPECTED_V2_CONTRACT_ADDRESS}"' in ENV
     assert 'VITE_GENLAYER_NETWORK="testnetBradbury"' in ENV
     assert f'VITE_GENLAYER_RPC_URL="{rpc}"' in ENV
 
@@ -134,4 +135,5 @@ def test_bradbury_compatibility_probe_is_recorded_without_claiming_live_v2():
     assert COMPATIBILITY["historical_rejected_release"]["contract_address"] == EXPECTED_CONTRACT_ADDRESS
     assert COMPATIBILITY["read_only_v2_probe"]["raw_fee_quote_error"]["details"] == "execution reverted"
     assert COMPATIBILITY["live_write"]["funding_attempt"] == "not_run"
-    assert "Pending separately finalized deployment" in README
+    assert EXPECTED_V2_CONTRACT_ADDRESS in README
+    assert "finalization pending" in README.lower()

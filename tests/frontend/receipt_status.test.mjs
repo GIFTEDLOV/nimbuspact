@@ -79,26 +79,21 @@ test("normalizes structured wallet and RPC failures without coercing objects", (
   assert.match(unknown.diagnostic, /arbitrary/);
 });
 
-test("keeps exact payable escrow value independent from fee deposit", () => {
+test("keeps exact payable escrow value separate from network transaction handling", () => {
   const options = buildWriteOptions({
     address: "0x1111111111111111111111111111111111111111",
     functionName: "create_policy",
     args: ["Lagos Island"],
     value: 100000000000000000n,
-  }, {
-    distribution: { executionBudgetPerRound: 123n },
-    feeValue: 456n,
   });
   assert.equal(options.value, 100000000000000000n);
-  assert.equal(options.fees.feeValue, 456n);
-  assert.notEqual(options.value, options.fees.feeValue);
+  assert.equal(Object.prototype.hasOwnProperty.call(options, "fees"), false);
 });
 
 test("maps the reviewer-facing contract and protocol failure cases", () => {
   const cases = [
     [{ code: 4001 }, /wallet request was rejected/i],
-    [{ message: 'The contract function "messageFeeParamsBudgetFloor" reverted.' }, /not exposing.*fee policy/i],
-    [{ message: "insufficient fee funding" }, /protocol-fee deposit/i],
+    [{ message: "insufficient fee funding" }, /needs more GEN.*transaction/i],
     [{ message: "fee policy mismatch" }, /stale|fee policy changed/i],
     [{ message: "Observation window is still open" }, /locked until.*closes/i],
     [{ message: "Refund is not eligible until the recovery grace period expires" }, /not refund-eligible/i],

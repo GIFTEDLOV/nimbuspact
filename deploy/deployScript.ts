@@ -2,15 +2,8 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 
 type DeployClient = {
-  estimateTransactionFees?: (options?: Record<string, unknown>) => Promise<FeeEstimate>;
   deployContract: (options: Record<string, unknown>) => Promise<string>;
   waitForTransactionReceipt: (options: Record<string, unknown>) => Promise<Receipt>;
-};
-
-type FeeEstimate = {
-  distribution: Record<string, unknown>;
-  messageAllocations?: Array<Record<string, unknown>>;
-  feeValue: bigint;
 };
 
 type Receipt = Record<string, any>;
@@ -43,16 +36,8 @@ function assertSuccessfulDeployment(receipt: Receipt): void {
 export default async function main(client: DeployClient): Promise<void> {
   const filePath = path.resolve(process.cwd(), "contracts/nimbuspact.py");
   const contractCode = new Uint8Array(readFileSync(filePath));
-  if (!client.estimateTransactionFees) throw new Error("The deployment client has no V2 fee-estimation method; refusing an unfunded Bradbury deployment.");
-
-  const estimate = await client.estimateTransactionFees();
-  const fees = {
-    distribution: estimate.distribution,
-    ...(estimate.messageAllocations ? { messageAllocations: estimate.messageAllocations } : {}),
-    feeValue: estimate.feeValue,
-  };
-  const deploymentTransaction = await client.deployContract({ code: contractCode, args: [], fees });
-  const receipt = await client.waitForTransactionReceipt({ hash: deploymentTransaction, waitUntil: "finalized", retries: 200, interval: 3000, fullTransaction: true });
+  const deploymentTransaction = await client.deployContract({ code: contractCode, args: [] });
+  const receipt = await client.waitForTransactionReceipt({ hash: deploymentTransaction, status: "FINALIZED", retries: 200, interval: 3000 });
   assertSuccessfulDeployment(receipt);
 
   console.log("NimbusPact V2 deployment finalized", {
@@ -61,6 +46,5 @@ export default async function main(client: DeployClient): Promise<void> {
     status: readField(receipt, "statusName", "status"),
     execution: readField(receipt, "txExecutionResultName", "txExecutionResult", "executionResult"),
     consensus: readField(receipt, "resultName", "result", "consensusResult"),
-    feeValue: estimate.feeValue.toString(),
   });
 }

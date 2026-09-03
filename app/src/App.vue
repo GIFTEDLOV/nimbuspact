@@ -1,8 +1,8 @@
 <template>
   <div class="app-shell">
     <div class="release-strip">
-      <span>V2 PREFLIGHT · HISTORICAL V1 DISCLOSED</span>
-      <span class="release-strip-copy">V2 preflight: escrow, fee-aware funding, and finalized settlement</span>
+      <span>NIMBUSPACT V2 · BRADBURY RELEASE</span>
+      <span class="release-strip-copy">Exact escrow funding, finalized settlement, and safe recovery</span>
       <a href="https://github.com/GIFTEDLOV/nimbuspact/blob/master/docs/live-proof/bradbury-smoke.json" target="_blank" rel="noreferrer">
         View historical proof <ArrowUpRight :size="13" />
       </a>
@@ -150,20 +150,15 @@
               <div class="funding-note">
                 <LockKeyhole :size="15" />
                 <span>
-                  The contract escrows exactly the stated payout. Network fees are a separate live estimate, and V2 provides creator refunds for NOT_TRIGGERED and safely expired DATA_UNAVAILABLE policies.
+                  The contract escrows exactly the stated payout. The wallet handles the network transaction fee separately; it is never added to policy escrow. V2 provides creator refunds for NOT_TRIGGERED and safely expired DATA_UNAVAILABLE policies.
                 </span>
               </div>
 
               <div class="fee-summary" aria-live="polite">
                 <div><span>Policy escrow</span><strong>{{ form.payout || "0" }} GEN</strong></div>
-                <div><span>Estimated network deposit</span><strong>{{ feeQuote ? formatGenPrecise(feeQuote.feeValue.toString()) : "—" }} GEN</strong></div>
-                <div><span>Total wallet requirement</span><strong>{{ feeQuote ? formatGenPrecise((parsePayoutForDisplay() + feeQuote.feeValue).toString()) : "—" }} GEN</strong></div>
+                <div><span>Network transaction fee</span><strong>Separate</strong></div>
               </div>
-              <button class="quiet-button quote-button" type="button" :disabled="busy || !walletAddress" @click="refreshFeeQuote">
-                <RefreshCw :class="{ spinning: quoting }" :size="14" />
-                {{ quoting ? "Measuring live fee…" : feeQuote ? "Refresh live fee quote" : "Get live fee quote" }}
-              </button>
-              <p v-if="feeQuote" class="form-hint">Quote verified against current Bradbury fee policy at {{ feeQuoteAt }}. It is not part of policy escrow.</p>
+              <p class="form-hint">Fund your wallet for the exact escrow plus the network transaction fee requested by Bradbury at signing time.</p>
 
               <button class="submit-button" type="submit" :disabled="busy || !configured || !walletAddress">
                 <LoaderCircle v-if="busy" class="spinning" :size="16" />
@@ -296,7 +291,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { AlertTriangle, ArrowDownRight, ArrowUpRight, CircleCheck, CloudRain, CloudSun, Clock3, Code2, Database, Fingerprint, HandCoins, LoaderCircle, LockKeyhole, Radar, RefreshCw, ShieldCheck, UserRound, WalletCards } from "lucide-vue-next";
-import { canRefundPolicy, canRetryResolution, claimPayout, connectWallet, createPolicy, estimateCreateFeeQuote, formatUtcTimestamp, getContractAddress, getNetworkLabel, getPendingTransactions, getPolicies, observationCloseTimestamp, recoverPendingTransactions, refundAvailableTimestamp, refundPolicy, resolvePolicy, type FeeQuote, type NoticeKind, type Policy, type PolicyInput } from "./lib/nimbuspact";
+import { canRefundPolicy, canRetryResolution, claimPayout, connectWallet, createPolicy, formatUtcTimestamp, getContractAddress, getNetworkLabel, getPendingTransactions, getPolicies, observationCloseTimestamp, recoverPendingTransactions, refundAvailableTimestamp, refundPolicy, resolvePolicy, type NoticeKind, type Policy, type PolicyInput } from "./lib/nimbuspact";
 import { NetworkFailure, normalizeNetworkError, policyStatusMessage } from "./lib/receiptStatus";
 
 const configured = Boolean(getContractAddress());
@@ -308,9 +303,6 @@ const loading = ref(false);
 const busy = ref(false);
 const recovery = ref(getPendingTransactions());
 const notice = ref<{ kind: NoticeKind; message: string; diagnostic?: string } | null>(null);
-const feeQuote = ref<FeeQuote | null>(null);
-const feeQuoteAt = ref("");
-const quoting = ref(false);
 
 function dateString(date: Date): string {
   const year = date.getUTCFullYear();
@@ -334,8 +326,6 @@ const lockedCollateral = computed(() => {
 function shortAddress(address: string): string { return address ? `${address.slice(0, 6)}…${address.slice(-4)}` : "Not set"; }
 function shortHash(hash: string): string { return hash ? `${hash.slice(0, 10)}…` : "not available"; }
 function formatGen(value: string): string { const amount = BigInt(value || "0"); const whole = amount / 1000000000000000000n; const fraction = (amount % 1000000000000000000n).toString().padStart(18, "0").slice(0, 4).replace(/0+$/, ""); return fraction ? `${whole}.${fraction}` : whole.toString(); }
-function formatGenPrecise(value: string): string { const amount = BigInt(value || "0"); const whole = amount / 1000000000000000000n; const fraction = (amount % 1000000000000000000n).toString().padStart(18, "0").slice(0, 8).replace(/0+$/, ""); return fraction ? `${whole}.${fraction}` : whole.toString(); }
-function parsePayoutForDisplay(): bigint { try { const [whole, fraction = ""] = form.value.payout.trim().split("."); return BigInt(whole || "0") * 1000000000000000000n + BigInt(fraction.padEnd(18, "0").slice(0, 18) || "0"); } catch { return 0n; } }
 function triggerLabel(trigger: string): string { return trigger === "HEAVY_RAIN" ? "Heavy rain" : trigger === "EXTREME_HEAT" ? "Extreme heat" : "Severe storm"; }
 function metricUnit(metric: string): string { return metric === "PRECIPITATION_MM" ? "mm" : metric === "TEMPERATURE_MAX_C" ? "°C" : "km/h"; }
 function statusLabel(status: string): string { return status === "ACTIVE" ? "Active" : status === "TRIGGERED" ? "Triggered" : status === "NOT_TRIGGERED" ? "Not triggered" : status === "DATA_UNAVAILABLE" ? "Data unavailable" : status === "REFUNDED" ? "Refunded" : "Claimed"; }
@@ -369,13 +359,10 @@ async function submitCreate(): Promise<void> {
   busy.value = true;
   try {
     const input = { ...form.value, beneficiary: form.value.beneficiary || walletAddress.value };
-    const quote = await estimateCreateFeeQuote(input, walletAddress.value);
-    feeQuote.value = quote;
-    feeQuoteAt.value = new Date().toISOString();
-    const policy = await createPolicy(input, walletAddress.value, quote);
+    const policy = await createPolicy(input, walletAddress.value);
     policies.value = await getPolicies();
     selectedPolicy.value = policy;
-    showNotice("success", `${policy.policy_id} was finalized and funded. Escrow was ${form.value.payout} GEN; the protocol fee was separate.`);
+    showNotice("success", `${policy.policy_id} was finalized and funded. Escrow was exactly ${form.value.payout} GEN; the network fee was separate.`);
   }
   catch (error) { showError(error, "The policy transaction did not complete."); }
   finally { busy.value = false; recovery.value = getPendingTransactions(); }
@@ -402,16 +389,6 @@ async function refund(policy: Policy): Promise<void> {
   try { const result = await refundPolicy(policy.policy_id, walletAddress.value || ""); policies.value = await getPolicies(); selectedPolicy.value = result; showNotice("success", "Creator refund finalized. The exact escrow returned to the stored policy creator."); }
   catch (error) { showError(error, "Creator refund did not complete."); }
   finally { busy.value = false; recovery.value = getPendingTransactions(); }
-}
-async function refreshFeeQuote(): Promise<void> {
-  if (!walletAddress.value) { showNotice("warning", "Connect a wallet before requesting a live fee quote."); return; }
-  quoting.value = true;
-  try {
-    feeQuote.value = await estimateCreateFeeQuote({ ...form.value, beneficiary: form.value.beneficiary || walletAddress.value }, walletAddress.value);
-    feeQuoteAt.value = new Date().toISOString();
-    showNotice("success", "Live fee policy verified. The displayed network deposit is separate from policy escrow.");
-  } catch (error) { showError(error, "The live fee quote could not be obtained."); }
-  finally { quoting.value = false; }
 }
 function onAccountsChanged(accounts: unknown): void { const first = Array.isArray(accounts) ? accounts[0] : null; walletAddress.value = typeof first === "string" ? first : null; if (walletAddress.value && !form.value.beneficiary) form.value.beneficiary = walletAddress.value; }
 onMounted(async () => { await refresh(); window.ethereum?.on?.("accountsChanged", onAccountsChanged); });
