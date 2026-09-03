@@ -1,10 +1,10 @@
 <template>
   <div class="app-shell">
     <div class="release-strip">
-      <span>LIVE ON TESTNET BRADBURY</span>
-      <span class="release-strip-copy">Finalized create → resolve → claim proof verified</span>
+      <span>V2 PREFLIGHT · HISTORICAL V1 DISCLOSED</span>
+      <span class="release-strip-copy">V2 preflight: escrow, fee-aware funding, and finalized settlement</span>
       <a href="https://github.com/GIFTEDLOV/nimbuspact/blob/master/docs/live-proof/bradbury-smoke.json" target="_blank" rel="noreferrer">
-        View proof <ArrowUpRight :size="13" />
+        View historical proof <ArrowUpRight :size="13" />
       </a>
     </div>
 
@@ -44,10 +44,10 @@
           </div>
         </div>
 
-        <aside class="proof-card" aria-label="Bradbury live proof snapshot">
+        <aside class="proof-card" aria-label="Historical Bradbury V1 proof snapshot">
           <div class="proof-card-head">
-            <span>Finalized proof / p-1</span>
-            <span class="proof-status"><CircleCheck :size="13" /> Verified</span>
+            <span>Historical V1 proof / p-1</span>
+            <span class="proof-status proof-status-rejected"><CircleCheck :size="13" /> Rejected release</span>
           </div>
           <div class="proof-location">Lagos, Nigeria</div>
           <div class="proof-title">Heavy rain trigger</div>
@@ -84,8 +84,8 @@
         </div>
       </section>
 
-      <section class="stats section-width" aria-label="NimbusPact live overview">
-        <div class="stat-card"><span>Policies on-chain</span><strong>{{ policies.length.toString().padStart(2, "0") }}</strong><small>Direct Bradbury contract read</small></div>
+      <section class="stats section-width" aria-label="NimbusPact V2 preflight overview">
+        <div class="stat-card"><span>Policies on-chain</span><strong>{{ policies.length.toString().padStart(2, "0") }}</strong><small>V2 read after compatible deployment</small></div>
         <div class="stat-card"><span>Locked policy value</span><strong>{{ lockedCollateral }}</strong><small>GEN attached to unclaimed policies</small></div>
         <div class="stat-card"><span>Evidence source</span><strong class="text-stat">Open-Meteo</strong><small>Archive API · fixed request · UTC</small></div>
         <div class="stat-card"><span>Execution rule</span><strong class="text-stat">Finalized only</strong><small>State read after successful execution</small></div>
@@ -106,6 +106,10 @@
         <div v-if="notice" class="notice" :class="`notice-${notice.kind}`" role="status">
           <component :is="notice.kind === 'success' ? CircleCheck : AlertTriangle" :size="17" />
           <span>{{ notice.message }}</span>
+          <details v-if="notice.diagnostic" class="notice-diagnostic">
+            <summary>Technical details</summary>
+            <code>{{ notice.diagnostic }}</code>
+          </details>
           <button class="notice-close" aria-label="Dismiss message" @click="notice = null">×</button>
         </div>
 
@@ -146,9 +150,20 @@
               <div class="funding-note">
                 <LockKeyhole :size="15" />
                 <span>
-                  This deployed Bradbury version irrevocably commits the exact payout amount. Only a triggered beneficiary claim releases it; there is no creator refund path.
+                  The contract escrows exactly the stated payout. Network fees are a separate live estimate, and V2 provides creator refunds for NOT_TRIGGERED and safely expired DATA_UNAVAILABLE policies.
                 </span>
               </div>
+
+              <div class="fee-summary" aria-live="polite">
+                <div><span>Policy escrow</span><strong>{{ form.payout || "0" }} GEN</strong></div>
+                <div><span>Estimated network deposit</span><strong>{{ feeQuote ? formatGenPrecise(feeQuote.feeValue.toString()) : "—" }} GEN</strong></div>
+                <div><span>Total wallet requirement</span><strong>{{ feeQuote ? formatGenPrecise((parsePayoutForDisplay() + feeQuote.feeValue).toString()) : "—" }} GEN</strong></div>
+              </div>
+              <button class="quiet-button quote-button" type="button" :disabled="busy || !walletAddress" @click="refreshFeeQuote">
+                <RefreshCw :class="{ spinning: quoting }" :size="14" />
+                {{ quoting ? "Measuring live fee…" : feeQuote ? "Refresh live fee quote" : "Get live fee quote" }}
+              </button>
+              <p v-if="feeQuote" class="form-hint">Quote verified against current Bradbury fee policy at {{ feeQuoteAt }}. It is not part of policy escrow.</p>
 
               <button class="submit-button" type="submit" :disabled="busy || !configured || !walletAddress">
                 <LoaderCircle v-if="busy" class="spinning" :size="16" />
@@ -164,8 +179,9 @@
             <div v-if="recovery.length" class="recovery-banner">
               <Clock3 :size="17" />
               <div>
-                <strong>Original hash preserved</strong>
-                <span>{{ recovery.length }} transaction{{ recovery.length === 1 ? "" : "s" }} remain linked to the saved hash{{ recovery.length === 1 ? " " + shortHash(recovery[0]?.hash || "") : "es" }}. NimbusPact will reconcile, not rebroadcast.</span>
+                <strong>Submission recovery is active</strong>
+                <span v-if="recovery[0]?.hash">{{ recovery.length }} transaction{{ recovery.length === 1 ? "" : "s" }} remain linked to the saved hash{{ recovery.length === 1 ? " " + shortHash(recovery[0]?.hash || "") : "es" }}. NimbusPact will reconcile, not rebroadcast.</span>
+                <span v-else>A previous submission did not return a hash. Refresh state before attempting another submission; NimbusPact will not rebroadcast it automatically.</span>
               </div>
               <button class="inline-button" :disabled="loading" @click="refresh"><RefreshCw :size="13" /> Check again</button>
             </div>
@@ -191,9 +207,17 @@
                 <button v-if="policy.status === 'ACTIVE'" class="inline-button" :disabled="busy || !resolutionWindowClosed(policy)" :title="resolutionWindowClosed(policy) ? 'Resolve policy' : 'Wait until the observation window has closed'" @click.stop="resolve(policy)">
                   <Radar :size="13" /> {{ resolutionWindowClosed(policy) ? "Resolve" : "Window open" }}
                 </button>
+                <button v-else-if="policy.status === 'DATA_UNAVAILABLE' && canRetry(policy)" class="inline-button" :disabled="busy" @click.stop="resolve(policy)"><RefreshCw :size="13" /> Retry resolution</button>
                 <button v-else-if="policy.status === 'TRIGGERED' && !policy.withdrawn" class="inline-button claim" :disabled="busy" @click.stop="claim(policy)"><HandCoins :size="13" /> Claim payout</button>
-                <span v-else>{{ policy.status === "CLAIMED" ? "Payout claimed" : "Resolution recorded" }}</span>
+                <button v-if="canRefund(policy)" class="inline-button refund" :disabled="busy" @click.stop="refund(policy)"><HandCoins :size="13" /> Claim refund</button>
+                <span v-if="policy.status === 'DATA_UNAVAILABLE' && !canRetry(policy) && !canRefund(policy)">Recovery window open</span>
+                <span v-else-if="policy.status === 'DATA_UNAVAILABLE' && canRefund(policy)">Refund available now</span>
+                <span v-else-if="policy.status === 'CLAIMED'">Payout claimed</span>
+                <span v-else-if="policy.status === 'REFUNDED'">Creator refunded</span>
+                <span v-else-if="policy.status === 'NOT_TRIGGERED' && !canRefund(policy)">Refund unavailable</span>
               </div>
+              <p v-if="policy.status === 'ACTIVE'" class="policy-timing">Resolution becomes available after {{ formatUtcTimestamp(observationCloseTimestamp(policy)) }}.</p>
+              <p v-if="policy.status === 'DATA_UNAVAILABLE' && refundAvailableTimestamp(policy)" class="policy-timing">Refund available after {{ formatUtcTimestamp(refundAvailableTimestamp(policy) || 0) }}.</p>
             </article>
           </section>
         </div>
@@ -220,8 +244,8 @@
           </div>
           <div class="detail-box">
             <span class="detail-label">Payout state</span>
-            <strong>{{ selectedPolicy.withdrawn ? "Transferred" : selectedPolicy.status === "TRIGGERED" ? "Claimable" : "Locked" }}</strong>
-            <p>Only the beneficiary can claim, and only after a successful finalized trigger resolution.</p>
+            <strong>{{ selectedPolicy.withdrawn ? (selectedPolicy.status === "REFUNDED" ? "Refunded" : "Transferred") : selectedPolicy.status === "TRIGGERED" ? "Claimable" : selectedPolicy.status === "NOT_TRIGGERED" ? "Refund available" : "Locked" }}</strong>
+            <p>{{ selectedPolicy.status === "NOT_TRIGGERED" ? "Threshold was not reached. Creator refund is available." : selectedPolicy.status === "DATA_UNAVAILABLE" ? "Evidence is retriable during recovery; a delayed creator refund protects the escrow if it remains unavailable." : "Only the beneficiary can claim a triggered payout, and only after successful finalized execution." }}</p>
             <span class="beneficiary-chip"><UserRound :size="13" /> {{ shortAddress(selectedPolicy.beneficiary) }}</span>
           </div>
         </div>
@@ -235,7 +259,7 @@
         <div class="steps">
           <div class="step"><span class="step-index">01</span><ShieldCheck :size="20" /><h3>Fund</h3><p>The creator sends exactly the stated payout amount into the payable Intelligent Contract.</p></div>
           <div class="step"><span class="step-index">02</span><Radar :size="20" /><h3>Resolve</h3><p>After the observation window closes, validators independently fetch the same fixed Open-Meteo request and reach strict-equivalence consensus.</p></div>
-          <div class="step"><span class="step-index">03</span><CircleCheck :size="20" /><h3>Claim</h3><p>A finalized triggered state becomes pull-claimable by the beneficiary and emits the GEN transfer on finalization.</p></div>
+          <div class="step"><span class="step-index">03</span><CircleCheck :size="20" /><h3>Settle</h3><p>A triggered result is claimable by the beneficiary; a non-trigger or safely expired unavailable result is pull-refundable by the creator.</p></div>
         </div>
       </section>
 
@@ -263,7 +287,7 @@
       <div class="section-width footer-inner">
         <div><span class="brand footer-brand"><span class="brand-mark"><CloudRain :size="17" /></span><span>NimbusPact</span></span><p>Parametric weather cover with finalized GenLayer settlement.</p></div>
         <div class="footer-links"><a href="#coverage">Coverage</a><a href="#technical">Trust model</a><a href="https://github.com/GIFTEDLOV/nimbuspact" target="_blank" rel="noreferrer">GitHub <ArrowUpRight :size="12" /></a></div>
-        <div class="footer-meta"><span>Testnet Bradbury</span><span>Contract 0xEAA6…C934</span><span>© 2026 NimbusPact</span></div>
+        <div class="footer-meta"><span>Target: Testnet Bradbury V2</span><span>Historical V1: 0xEAA6…C934</span><span>© 2026 NimbusPact</span></div>
       </div>
     </footer>
   </div>
@@ -272,8 +296,8 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { AlertTriangle, ArrowDownRight, ArrowUpRight, CircleCheck, CloudRain, CloudSun, Clock3, Code2, Database, Fingerprint, HandCoins, LoaderCircle, LockKeyhole, Radar, RefreshCw, ShieldCheck, UserRound, WalletCards } from "lucide-vue-next";
-import { claimPayout, connectWallet, createPolicy, getContractAddress, getNetworkLabel, getPendingTransactions, getPolicies, recoverPendingTransactions, resolvePolicy, type NoticeKind, type Policy, type PolicyInput } from "./lib/nimbuspact";
-import { policyStatusMessage } from "./lib/receiptStatus";
+import { canRefundPolicy, canRetryResolution, claimPayout, connectWallet, createPolicy, estimateCreateFeeQuote, formatUtcTimestamp, getContractAddress, getNetworkLabel, getPendingTransactions, getPolicies, observationCloseTimestamp, recoverPendingTransactions, refundAvailableTimestamp, refundPolicy, resolvePolicy, type FeeQuote, type NoticeKind, type Policy, type PolicyInput } from "./lib/nimbuspact";
+import { NetworkFailure, normalizeNetworkError, policyStatusMessage } from "./lib/receiptStatus";
 
 const configured = Boolean(getContractAddress());
 const networkLabel = getNetworkLabel();
@@ -283,19 +307,22 @@ const selectedPolicy = ref<Policy | null>(null);
 const loading = ref(false);
 const busy = ref(false);
 const recovery = ref(getPendingTransactions());
-const notice = ref<{ kind: NoticeKind; message: string } | null>(null);
+const notice = ref<{ kind: NoticeKind; message: string; diagnostic?: string } | null>(null);
+const feeQuote = ref<FeeQuote | null>(null);
+const feeQuoteAt = ref("");
+const quoting = ref(false);
 
 function dateString(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
 const end = new Date();
-end.setDate(end.getDate() - 1);
+end.setUTCDate(end.getUTCDate() + 2);
 const start = new Date(end);
-start.setDate(start.getDate() - 6);
+start.setUTCDate(start.getUTCDate() + 1);
 const form = ref<PolicyInput>({ locationName: "Lagos Island", latitude: "6.5244", longitude: "3.3792", startDate: dateString(start), endDate: dateString(end), triggerType: "HEAVY_RAIN", threshold: "50", beneficiary: "", payout: "0.25" });
 
 const thresholdUnit = computed(() => form.value.triggerType === "HEAVY_RAIN" ? "mm" : form.value.triggerType === "EXTREME_HEAT" ? "°C" : "km/h");
@@ -307,28 +334,32 @@ const lockedCollateral = computed(() => {
 function shortAddress(address: string): string { return address ? `${address.slice(0, 6)}…${address.slice(-4)}` : "Not set"; }
 function shortHash(hash: string): string { return hash ? `${hash.slice(0, 10)}…` : "not available"; }
 function formatGen(value: string): string { const amount = BigInt(value || "0"); const whole = amount / 1000000000000000000n; const fraction = (amount % 1000000000000000000n).toString().padStart(18, "0").slice(0, 4).replace(/0+$/, ""); return fraction ? `${whole}.${fraction}` : whole.toString(); }
+function formatGenPrecise(value: string): string { const amount = BigInt(value || "0"); const whole = amount / 1000000000000000000n; const fraction = (amount % 1000000000000000000n).toString().padStart(18, "0").slice(0, 8).replace(/0+$/, ""); return fraction ? `${whole}.${fraction}` : whole.toString(); }
+function parsePayoutForDisplay(): bigint { try { const [whole, fraction = ""] = form.value.payout.trim().split("."); return BigInt(whole || "0") * 1000000000000000000n + BigInt(fraction.padEnd(18, "0").slice(0, 18) || "0"); } catch { return 0n; } }
 function triggerLabel(trigger: string): string { return trigger === "HEAVY_RAIN" ? "Heavy rain" : trigger === "EXTREME_HEAT" ? "Extreme heat" : "Severe storm"; }
 function metricUnit(metric: string): string { return metric === "PRECIPITATION_MM" ? "mm" : metric === "TEMPERATURE_MAX_C" ? "°C" : "km/h"; }
-function statusLabel(status: string): string { return status === "ACTIVE" ? "Active" : status === "TRIGGERED" ? "Triggered" : status === "NOT_TRIGGERED" ? "Not triggered" : status === "DATA_UNAVAILABLE" ? "Data unavailable" : "Claimed"; }
+function statusLabel(status: string): string { return status === "ACTIVE" ? "Active" : status === "TRIGGERED" ? "Triggered" : status === "NOT_TRIGGERED" ? "Not triggered" : status === "DATA_UNAVAILABLE" ? "Data unavailable" : status === "REFUNDED" ? "Refunded" : "Claimed"; }
 function statusClass(status: string): string { return `status-${status.toLowerCase()}`; }
-function resultTitle(policy: Policy): string { return policy.status === "TRIGGERED" || policy.status === "CLAIMED" ? "Weather trigger confirmed" : policy.status === "NOT_TRIGGERED" ? "Threshold not crossed" : policy.status === "DATA_UNAVAILABLE" ? "Evidence unavailable" : "Awaiting resolution"; }
+function resultTitle(policy: Policy): string { return policy.status === "TRIGGERED" || policy.status === "CLAIMED" ? "Weather trigger confirmed" : policy.status === "NOT_TRIGGERED" ? "Threshold not crossed" : policy.status === "DATA_UNAVAILABLE" ? "Evidence unavailable" : policy.status === "REFUNDED" ? "Escrow refunded" : "Awaiting resolution"; }
 function resultDescription(policy: Policy): string { return policyStatusMessage(policy.status); }
-function showNotice(kind: NoticeKind, message: string): void { notice.value = { kind, message }; }
+function showNotice(kind: NoticeKind, message: string, diagnostic?: string): void { notice.value = { kind, message, diagnostic }; }
+function showError(error: unknown, fallback: string): void { const normalized = error instanceof NetworkFailure ? { headline: error.message, diagnostic: error.diagnostic } : normalizeNetworkError(error); showNotice("error", normalized.headline || fallback, normalized.diagnostic); console.error("NimbusPact transaction diagnostic", error); }
 function resolutionWindowClosed(policy: Policy): boolean {
-  const closeTime = Date.parse(`${policy.end_date}T23:59:59Z`);
-  return Number.isFinite(closeTime) && Date.now() > closeTime;
+  return Math.floor(Date.now() / 1000) >= observationCloseTimestamp(policy);
 }
+function canRetry(policy: Policy): boolean { return canRetryResolution(policy); }
+function canRefund(policy: Policy): boolean { return Boolean(walletAddress.value) && canRefundPolicy(policy, walletAddress.value || ""); }
 
 async function handleWallet(): Promise<void> {
   if (walletAddress.value) return;
   try { walletAddress.value = await connectWallet(); if (!form.value.beneficiary) form.value.beneficiary = walletAddress.value; showNotice("success", `Wallet connected on ${networkLabel}.`); }
-  catch (error) { showNotice("error", error instanceof Error ? error.message : "Wallet connection was not completed."); }
+  catch (error) { showError(error, "Wallet connection was not completed."); }
 }
 async function refresh(): Promise<void> {
   if (!configured) return;
   loading.value = true;
   try { const recovered = await recoverPendingTransactions(); recovery.value = getPendingTransactions(); if (recovered.length) showNotice(recovered[0].kind, recovered[0].message); policies.value = await getPolicies(); if (selectedPolicy.value) selectedPolicy.value = policies.value.find((policy) => policy.policy_id === selectedPolicy.value?.policy_id) ?? null; }
-  catch (error) { showNotice("error", error instanceof Error ? error.message : "Could not read NimbusPact state."); }
+  catch (error) { showError(error, "Could not read NimbusPact state."); }
   finally { loading.value = false; }
 }
 function syncThreshold(): void { form.value.threshold = form.value.triggerType === "HEAVY_RAIN" ? "50" : form.value.triggerType === "EXTREME_HEAT" ? "35" : "80"; }
@@ -336,22 +367,51 @@ function selectPolicy(policy: Policy): void { selectedPolicy.value = policy; }
 async function submitCreate(): Promise<void> {
   if (!walletAddress.value) { showNotice("error", "Connect the beneficiary or creator wallet before funding a policy."); return; }
   busy.value = true;
-  try { const policy = await createPolicy({ ...form.value, beneficiary: form.value.beneficiary || walletAddress.value }, walletAddress.value); policies.value = await getPolicies(); selectedPolicy.value = policy; showNotice("success", `${policy.policy_id} was finalized and funded.`); }
-  catch (error) { showNotice("error", error instanceof Error ? error.message : "The policy transaction did not complete."); }
+  try {
+    const input = { ...form.value, beneficiary: form.value.beneficiary || walletAddress.value };
+    const quote = await estimateCreateFeeQuote(input, walletAddress.value);
+    feeQuote.value = quote;
+    feeQuoteAt.value = new Date().toISOString();
+    const policy = await createPolicy(input, walletAddress.value, quote);
+    policies.value = await getPolicies();
+    selectedPolicy.value = policy;
+    showNotice("success", `${policy.policy_id} was finalized and funded. Escrow was ${form.value.payout} GEN; the protocol fee was separate.`);
+  }
+  catch (error) { showError(error, "The policy transaction did not complete."); }
   finally { busy.value = false; recovery.value = getPendingTransactions(); }
 }
 async function resolve(policy: Policy): Promise<void> {
-  if (!resolutionWindowClosed(policy)) { showNotice("warning", `Wait until ${policy.end_date} has fully closed in UTC before resolving. Resolving too early can permanently record DATA_UNAVAILABLE in this deployed version.`); return; }
+  if (!canRetry(policy)) {
+    const availableAt = policy.status === "DATA_UNAVAILABLE" && refundAvailableTimestamp(policy) ? ` Retry is closed after the recovery deadline ${formatUtcTimestamp(refundAvailableTimestamp(policy) || 0)}.` : ` Resolution becomes available after ${formatUtcTimestamp(observationCloseTimestamp(policy))}.`;
+    showNotice("warning", availableAt);
+    return;
+  }
   busy.value = true;
-  try { const result = await resolvePolicy(policy.policy_id, walletAddress.value || ""); policies.value = await getPolicies(); selectedPolicy.value = result; showNotice(result.status === "TRIGGERED" ? "success" : result.status === "DATA_UNAVAILABLE" ? "warning" : "success", result.status === "TRIGGERED" ? "Validators finalized a triggered result. The payout is now claimable by the beneficiary." : result.status === "DATA_UNAVAILABLE" ? "The source was unavailable or malformed. No positive trigger was recorded." : "Validators finalized a non-triggered result. No beneficiary payout is due."); }
-  catch (error) { showNotice("error", error instanceof Error ? error.message : "Resolution did not finalize successfully."); }
+  try { const result = await resolvePolicy(policy.policy_id, walletAddress.value || ""); policies.value = await getPolicies(); selectedPolicy.value = result; showNotice(result.status === "TRIGGERED" ? "success" : result.status === "DATA_UNAVAILABLE" ? "warning" : "success", result.status === "TRIGGERED" ? "Validators finalized a triggered result. The payout is now claimable by the beneficiary." : result.status === "DATA_UNAVAILABLE" ? "Weather evidence could not be verified. Your payout remains protected. Retry resolution is available." : "Validators finalized a non-triggered result. Creator refund is available."); }
+  catch (error) { showError(error, "Resolution did not finalize successfully."); }
   finally { busy.value = false; recovery.value = getPendingTransactions(); }
 }
 async function claim(policy: Policy): Promise<void> {
   busy.value = true;
   try { const result = await claimPayout(policy.policy_id, walletAddress.value || ""); policies.value = await getPolicies(); selectedPolicy.value = result; showNotice("success", "Payout claim finalized. The contract emitted the funded GEN transfer."); }
-  catch (error) { showNotice("error", error instanceof Error ? error.message : "Payout claim did not complete."); }
+  catch (error) { showError(error, "Payout claim did not complete."); }
   finally { busy.value = false; recovery.value = getPendingTransactions(); }
+}
+async function refund(policy: Policy): Promise<void> {
+  busy.value = true;
+  try { const result = await refundPolicy(policy.policy_id, walletAddress.value || ""); policies.value = await getPolicies(); selectedPolicy.value = result; showNotice("success", "Creator refund finalized. The exact escrow returned to the stored policy creator."); }
+  catch (error) { showError(error, "Creator refund did not complete."); }
+  finally { busy.value = false; recovery.value = getPendingTransactions(); }
+}
+async function refreshFeeQuote(): Promise<void> {
+  if (!walletAddress.value) { showNotice("warning", "Connect a wallet before requesting a live fee quote."); return; }
+  quoting.value = true;
+  try {
+    feeQuote.value = await estimateCreateFeeQuote({ ...form.value, beneficiary: form.value.beneficiary || walletAddress.value }, walletAddress.value);
+    feeQuoteAt.value = new Date().toISOString();
+    showNotice("success", "Live fee policy verified. The displayed network deposit is separate from policy escrow.");
+  } catch (error) { showError(error, "The live fee quote could not be obtained."); }
+  finally { quoting.value = false; }
 }
 function onAccountsChanged(accounts: unknown): void { const first = Array.isArray(accounts) ? accounts[0] : null; walletAddress.value = typeof first === "string" ? first : null; if (walletAddress.value && !form.value.beneficiary) form.value.beneficiary = walletAddress.value; }
 onMounted(async () => { await refresh(); window.ethereum?.on?.("accountsChanged", onAccountsChanged); });

@@ -26,6 +26,8 @@ LATITUDE = 6.5244
 LONGITUDE = 3.3792
 START_DATE = "2024-06-20"
 END_DATE = "2024-06-22"
+CREATE_TIMESTAMP = "2024-06-19T23:59:59Z"
+AFTER_WINDOW_TIMESTAMP = "2024-06-23T00:00:00Z"
 
 
 def to_hex(address):
@@ -63,6 +65,11 @@ def mock_weather(vm, payload=None, status=200, body=None):
 
 
 def fund_policy(vm, contract, creator, beneficiary, **overrides):
+    creation_timestamp = overrides.pop("creation_timestamp", CREATE_TIMESTAMP)
+    post_create_timestamp = overrides.pop(
+        "post_create_timestamp", AFTER_WINDOW_TIMESTAMP
+    )
+    vm.warp(creation_timestamp)
     vm.sender = creator
     vm.value = PAYOUT
     args = {
@@ -79,4 +86,6 @@ def fund_policy(vm, contract, creator, beneficiary, **overrides):
     args.update(overrides)
     policy_id = contract.create_policy(**args)
     vm.value = 0
+    if post_create_timestamp is not None:
+        vm.warp(post_create_timestamp)
     return policy_id, args

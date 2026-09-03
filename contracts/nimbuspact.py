@@ -3,6 +3,7 @@
 import hashlib
 import json
 from dataclasses import dataclass
+from datetime import datetime, timezone
 
 from genlayer import *
 
@@ -10,6 +11,8 @@ from genlayer import *
 SOURCE_NAME = "Open-Meteo Archive API"
 SOURCE_BASE_URL = "https://archive-api.open-meteo.com/v1/archive"
 MAX_WINDOW_DAYS = 31
+SECONDS_PER_DAY = 86400
+RECOVERY_GRACE_SECONDS = 86400
 
 TRIGGER_HEAVY_RAIN = "HEAVY_RAIN"
 TRIGGER_EXTREME_HEAT = "EXTREME_HEAT"
@@ -25,6 +28,7 @@ STATUS_TRIGGERED = "TRIGGERED"
 STATUS_NOT_TRIGGERED = "NOT_TRIGGERED"
 STATUS_DATA_UNAVAILABLE = "DATA_UNAVAILABLE"
 STATUS_CLAIMED = "CLAIMED"
+STATUS_REFUNDED = "REFUNDED"
 
 
 @allow_storage
@@ -42,13 +46,18 @@ class Policy:
     metric: str
     threshold: str
     payout_amount: u256
+    observation_start_timestamp: u256
+    observation_end_timestamp: u256
     status: str
     evidence_url: str
     evidence_digest: str
     resolution_result: str
     observed_value: str
     resolution_code: str
+    resolution_attempts: u256
+    data_unavailable_since: u256
     withdrawn: bool
+    refunded: bool
 
 
 @gl.evm.contract_interface
@@ -103,6 +112,17 @@ def _date_ordinal(date_parts: tuple) -> int:
     for current_month in range(1, month):
         ordinal += _days_in_month(year, current_month)
     return ordinal + day
+
+
+def _date_start_timestamp(date_parts: tuple) -> int:
+    epoch_ordinal = _date_ordinal((1970, 1, 1))
+    return (_date_ordinal(date_parts) - epoch_ordinal) * SECONDS_PER_DAY
+
+
+def _transaction_timestamp() -> int:
+    # GenLayer pins datetime.now() to the deterministic transaction timestamp
+    # for every validator execution.
+    return int(datetime.now(timezone.utc).timestamp())
 
 
 def _format_date(date_parts: tuple) -> str:
@@ -343,7 +363,7 @@ class NimbusPact(gl.Contract):
             normalized_values = []
             maximum_value = minimum
             current_day = start_date
-            for _ in range(expected_days):
+            for day_index in range(expected_days):
                 index = -1
                 for candidate_index in range(len(times)):
                     if times[candidate_index] == current_day:
@@ -378,7 +398,8 @@ class NimbusPact(gl.Contract):
                         "value": "{:.3f}".format(numeric_value),
                     }
                 )
-                current_day = _next_date(current_day)
+                if day_index + 1 < expected_days:
+                    current_day = _next_date(current_day)
 
             normalized_evidence = json.dumps(
                 {
@@ -449,6 +470,12 @@ class NimbusPact(gl.Contract):
             _fail("Observation end date must not precede start date")
         if end_ordinal - start_ordinal + 1 > MAX_WINDOW_DAYS:
             _fail("Observation window cannot exceed 31 days")
+        observation_start_timestamp = _date_start_timestamp(start_parts)
+        observation_end_timestamp = (
+            _date_start_timestamp(end_parts) + SECONDS_PER_DAY
+        )
+        if _transaction_timestamp() >= observation_start_timestamp:
+            _fail("Policy observation window must begin in the future")
         if trigger_type not in ALLOWED_TRIGGERS:
             _fail("Unsupported trigger type")
         canonical_threshold = _canonical_threshold(trigger_type, threshold)
@@ -482,13 +509,18 @@ class NimbusPact(gl.Contract):
             metric=_trigger_details(trigger_type)[0],
             threshold=canonical_threshold,
             payout_amount=payout_amount,
+            observation_start_timestamp=u256(observation_start_timestamp),
+            observation_end_timestamp=u256(observation_end_timestamp),
             status=STATUS_ACTIVE,
             evidence_url=evidence_url,
             evidence_digest="",
             resolution_result="",
             observed_value="",
             resolution_code="",
+            resolution_attempts=u256(0),
+            data_unavailable_since=u256(0),
             withdrawn=False,
+            refunded=False,
         )
         self.policies[policy_id] = policy
         self.policy_ids.append(policy_id)
@@ -500,8 +532,17 @@ class NimbusPact(gl.Contract):
         if policy_id not in self.policies:
             _fail("Policy not found")
         policy = self.policies[policy_id]
-        if policy.status != STATUS_ACTIVE:
-            _fail("Policy has already been resolved")
+        if policy.refunded or policy.status == STATUS_REFUNDED:
+            _fail("Policy has already been refunded")
+        now = _transaction_timestamp()
+        if now < int(policy.observation_end_timestamp):
+            _fail("Observation window is still open")
+        if policy.status == STATUS_DATA_UNAVAILABLE:
+            if now >= int(policy.data_unavailable_since) + RECOVERY_GRACE_SECONDS:
+                _fail("DATA_UNAVAILABLE recovery grace period has expired")
+        elif policy.status != STATUS_ACTIVE:
+            _fail("Policy is not resolvable in its current state")
+        policy.resolution_attempts += u256(1)
         result = self._resolve_from_source(policy)
         policy.status = result["decision"]
         policy.resolution_result = result["decision"]
@@ -510,12 +551,21 @@ class NimbusPact(gl.Contract):
         policy.evidence_digest = hashlib.sha256(
             result["evidence"].encode("utf-8")
         ).hexdigest()
+        if result["decision"] == STATUS_DATA_UNAVAILABLE:
+            if policy.data_unavailable_since == u256(0):
+                policy.data_unavailable_since = u256(now)
+        else:
+            # A successful retry is conclusive. It removes the unavailable
+            # recovery path before any payout/refund decision can be made.
+            policy.data_unavailable_since = u256(0)
 
     @gl.public.write
     def claim_payout(self, policy_id: str) -> None:
         if policy_id not in self.policies:
             _fail("Policy not found")
         policy = self.policies[policy_id]
+        if policy.refunded or policy.status == STATUS_REFUNDED:
+            _fail("Policy has already been refunded")
         if policy.withdrawn or policy.status == STATUS_CLAIMED:
             _fail("Payout already claimed")
         if policy.status != STATUS_TRIGGERED:
@@ -534,6 +584,41 @@ class NimbusPact(gl.Contract):
         )
         policy.withdrawn = True
         policy.status = STATUS_CLAIMED
+
+    @gl.public.write
+    def refund_policy(self, policy_id: str) -> None:
+        if policy_id not in self.policies:
+            _fail("Policy not found")
+        policy = self.policies[policy_id]
+        if policy.refunded or policy.status == STATUS_REFUNDED:
+            _fail("Policy has already been refunded")
+        if policy.withdrawn or policy.status == STATUS_CLAIMED:
+            _fail("Policy funds have already been claimed")
+        if gl.message.sender_address.as_hex != policy.creator:
+            _fail("Only the policy creator can claim a refund")
+
+        now = _transaction_timestamp()
+        if policy.status == STATUS_NOT_TRIGGERED:
+            pass
+        elif policy.status == STATUS_DATA_UNAVAILABLE:
+            if now < int(policy.data_unavailable_since) + RECOVERY_GRACE_SECONDS:
+                _fail("Refund is not eligible until the recovery grace period expires")
+        else:
+            _fail("Policy is not refund eligible")
+        if self.balance < policy.payout_amount:
+            _fail("Insufficient contract balance for refund")
+
+        # External EOA messages are finalized-only. The solvency check and
+        # terminal state transition happen in this parent execution before the
+        # native GEN transfer is emitted, so a second refund/claim cannot race
+        # against the same escrow state.
+        policy.refunded = True
+        policy.withdrawn = True
+        policy.status = STATUS_REFUNDED
+        NativeRecipient(Address(policy.creator)).emit_transfer(
+            value=policy.payout_amount,
+            on="finalized",
+        )
 
     @gl.public.view
     def get_policy(self, policy_id: str) -> Policy:

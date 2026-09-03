@@ -155,6 +155,7 @@ h1 em, .how-heading h2 em, .technical-heading h2 em { font-family: "Newsreader",
 }
 .proof-card-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 18px; border-bottom: 1px solid var(--line); color: #6d6a64; font-size: 9px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
 .proof-status { display: inline-flex; align-items: center; gap: 5px; color: #48603d; }
+.proof-status-rejected { color: #a24d3f; }
 .proof-location { margin-top: 23px; color: #6e6c67; font-family: "Newsreader", Georgia, serif; font-size: 17px; font-style: italic; }
 .proof-title { margin-top: 5px; font-size: 23px; font-weight: 500; letter-spacing: -.04em; }
 .proof-metric { display: flex; align-items: end; gap: 10px; margin-top: 34px; }
@@ -205,6 +206,9 @@ h1 em, .how-heading h2 em, .technical-heading h2 em { font-family: "Newsreader",
 .notice-warning { background: var(--warn); }
 .notice-error { background: var(--error); }
 .notice-close { margin-left: auto; border: 0; background: transparent; cursor: pointer; font-size: 18px; }
+.notice-diagnostic { flex: 1 1 100%; min-width: 0; color: var(--muted); }
+.notice-diagnostic summary { cursor: pointer; margin-bottom: 5px; font-size: 10px; }
+.notice-diagnostic code { display: block; max-height: 120px; overflow: auto; white-space: pre-wrap; word-break: break-word; font-size: 9px; }
 
 .workspace-grid { display: grid; grid-template-columns: minmax(340px, .84fr) minmax(0, 1.16fr); gap: 18px; align-items: start; }
 .panel, .policy-card, .detail-box { border: 1px solid var(--line); background: var(--cream); }
@@ -225,6 +229,11 @@ h1 em, .how-heading h2 em, .technical-heading h2 em { font-family: "Newsreader",
 .amount-input span { position: absolute; top: 14px; right: 12px; color: var(--accent); font-size: 9px; font-weight: 700; }
 .funding-note { display: flex; align-items: flex-start; gap: 9px; margin: 5px 0 20px; padding: 13px; color: #6f5a4d; background: #eee2d1; font-size: 10px; line-height: 1.5; }
 .funding-note svg { flex: none; margin-top: 1px; color: var(--accent); }
+.fee-summary { display: grid; gap: 6px; margin: -8px 0 10px; padding: 12px 13px; border: 1px solid var(--line); background: rgba(255,255,255,.35); font-size: 10px; }
+.fee-summary div { display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+.fee-summary span { color: var(--muted); }
+.fee-summary strong { color: var(--ink); font-weight: 700; }
+.quote-button { margin: 0 0 8px; min-height: 28px; font-size: 9px; }
 .submit-button { width: 100%; min-height: 45px; color: #f8f4ed; background: var(--ink); border-radius: 3px; font-size: 11px; }
 .submit-button:hover { background: #090909; }
 .form-hint { margin-top: 11px; color: #78756e; font-size: 10px; line-height: 1.5; text-align: center; }
@@ -240,7 +249,7 @@ h1 em, .how-heading h2 em, .technical-heading h2 em { font-family: "Newsreader",
 .policy-card-header, .policy-main, .policy-card-footer, .detail-heading { display: flex; align-items: center; justify-content: space-between; }
 .policy-id, code, .muted-id { color: #7e7a72; font-size: 9px; letter-spacing: .05em; }
 .status-tag { display: inline-flex; width: fit-content; padding: 5px 8px; border: 1px solid rgba(0,0,0,.12); border-radius: 999px; font-size: 8px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-.status-triggered, .status-claimed { color: #2f4626; background: #d9e6c9; }
+.status-triggered, .status-claimed, .status-refunded { color: #2f4626; background: #d9e6c9; }
 .status-active { color: #6a4c1b; background: #ead4a6; }
 .status-not_triggered { color: #57534b; background: #ddd9d0; }
 .status-data_unavailable { color: #6d392e; background: #e7c1b7; }
@@ -255,6 +264,10 @@ h1 em, .how-heading h2 em, .technical-heading h2 em { font-family: "Newsreader",
 .inline-button { min-height: 30px; padding: 0 10px; border-color: var(--line); border-radius: 999px; font-size: 9px; font-weight: 600; }
 .inline-button.claim { color: #f7f3ed; border-color: var(--ink); background: var(--ink); }
 .inline-button.claim:hover { background: #000; }
+.inline-button.refund { color: #6d392e; border-color: #b68a78; background: #f0d8cd; }
+.inline-button.refund:hover { color: #f7f3ed; background: #6d392e; }
+.policy-actions { display: flex; align-items: center; justify-content: flex-end; gap: 7px; flex-wrap: wrap; }
+.policy-timing { margin: 9px 0 0; color: var(--muted); font-size: 9px; }
 .empty-state { display: grid; min-height: 330px; padding: 50px; place-items: center; align-content: center; border: 1px dashed var(--line); background: rgba(255,255,255,.28); text-align: center; }
 .empty-state svg { color: var(--accent); }
 .empty-state h3 { margin-top: 16px; font-size: 20px; font-weight: 500; }

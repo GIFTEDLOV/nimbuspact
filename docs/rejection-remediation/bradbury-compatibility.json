@@ -1,0 +1,46 @@
+{
+  "captured_date_utc": "2026-09-03",
+  "starting_head": "3546a8a79b08097a712f8f37244a28e273665d5b",
+  "historical_rejected_release": {
+    "contract_address": "0xEAA6Cb19AcB1E81e729224c590a5Cd5060D0c934",
+    "source_sha256": "1a6386e22ffc60d8beae3640569bf25ec6582c7896bb565bb1b161b96810e310",
+    "public_frontend": "https://nimbuspact.vercel.app",
+    "frontend_genlayer_js": "^1.1.8"
+  },
+  "mechanical_reproduction": {
+    "create_policy_payable_check": "present: @gl.public.write.payable and gl.message.value != payout_amount",
+    "resolve_policy_transaction_time_guard": "absent in starting release",
+    "not_triggered_creator_refund": "absent in starting release",
+    "data_unavailable_recovery": "terminal in starting release; no retry or creator refund",
+    "object_object_path": "starting formatter used String(error) for non-Error values"
+  },
+  "read_only_v2_probe": {
+    "sdk": "genlayer-js 2.0.0-rc.1 at 8bc7c73cf26e57473804bdd1caad17f99d49d4ae",
+    "rpc": "https://rpc-bradbury.genlayer.com",
+    "chain_id": 4221,
+    "cli_version": "0.39.1",
+    "cli_fee_lifecycle_flags": "absent from genlayer deploy/write help",
+    "fee_manager": "0xF205868bf5db79d2162843742D18D0900A9E462a",
+    "raw_fee_quote_error": {
+      "name": "ContractFunctionExecutionError",
+      "message": "The contract function \"messageFeeParamsBudgetFloor\" reverted.\n\nContract Call:\n  address:   0xF205868bf5db79d2162843742D18D0900A9E462a\n  function: messageFeeParamsBudgetFloor()\n\nDetails: execution reverted\nVersion: viem@2.56.1",
+      "shortMessage": "The contract function \"messageFeeParamsBudgetFloor\" reverted.",
+      "details": "execution reverted"
+    },
+    "fee_policy_read_observation": "GENPerTimeUnit and storageUnitPrice returned zero; quoteGasPrice and messageFeeParamsBudgetFloor reverted"
+  },
+  "read_only_legacy_contract_probe": {
+    "contract": "0xEAA6Cb19AcB1E81e729224c590a5Cd5060D0c934",
+    "raw_read_error": {
+      "name": "InvalidInputRpcError",
+      "code": -32000,
+      "shortMessage": "Missing or invalid parameters. Double check you have provided the correct parameters.",
+      "details_excerpt": "execution failed: genvm.VMResult; stderr: ValueError: call to private method Contract.__handle_undefined_method__; call to private method Contract.__receive__"
+    }
+  },
+  "live_write": {
+    "funding_attempt": "not_run",
+    "reason": "No browser wallet/test account was available in this environment, and the read-only fee-policy probe failed before signing. No GEN was spent on a speculative write.",
+    "root_cause_status": "The exact rejected browser write object was not available to capture. The current endpoint incompatibility is proven at fee estimation; the old V1 funding failure is not assigned a speculative single cause."
+  }
+}
