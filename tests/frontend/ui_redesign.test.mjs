@@ -58,6 +58,7 @@ test("responsive and accessible presentation safeguards are defined", () => {
   assert.match(appSource, /aria-label="Main navigation"/);
   assert.match(appSource, /role="dialog" aria-modal="true"/);
   assert.match(appSource, /aria-live="polite"/);
+  assert.match(appSource, /@keydown\.space\.prevent="selectPolicy\(policy\)"/);
   assert.match(styleSource, /focus-visible/);
   assert.match(styleSource, /prefers-reduced-motion: reduce/);
   for (const breakpoint of ["1080px", "780px", "480px"]) assert.match(styleSource, new RegExp(`max-width: ${breakpoint}`));
