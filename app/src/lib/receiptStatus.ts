@@ -257,7 +257,7 @@ export function normalizeNetworkError(error: unknown): NormalizedNetworkError {
   if (/wallet provider.*does not support|method not found.*wallet_|unsupported wallet method/.test(lower)) {
     return { headline: "This wallet provider cannot switch to the configured GenLayer network. Use a compatible browser wallet and try again.", diagnostic };
   }
-  if (code === "-32601" || /method not found|unsupported rpc method|rpc method.*not supported/.test(lower)) {
+  if (code === "-32601" || /method not found|unsupported rpc method|rpc method.*not supported|configured rpc.*does not support/.test(lower)) {
     return { headline: "The configured RPC does not support this GenLayer operation. Check the Bradbury RPC and refresh before retrying.", diagnostic };
   }
   if (/fee estimat|estimate.*fee/.test(lower)) {

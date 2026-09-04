@@ -71,10 +71,9 @@ export interface ContractWriteRequest {
 export interface WalletClient {
   writeContract(options: Record<string, unknown>): Promise<string>;
   readContract(options: Record<string, unknown>): Promise<unknown>;
+  getTransaction(options: { hash: string }): Promise<unknown>;
   waitForTransactionReceipt(options: Record<string, unknown>): Promise<unknown>;
   waitForFinalization?: (options: Record<string, unknown>) => Promise<unknown>;
-  getCode?: (options: Record<string, unknown>) => Promise<unknown>;
-  request?: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
   connect?: (network: string) => Promise<void>;
 }
 
@@ -101,6 +100,9 @@ export interface PendingTransaction {
 type UnknownRecord = Record<string, unknown>;
 
 export const RECOVERY_GRACE_SECONDS = 86_400;
+export const NIMBUSPACT_V2_CONTRACT_ADDRESS = "0x055F97140CE35FD1e656ebb3D204952A46646681";
+export const NIMBUSPACT_V2_DEPLOYMENT_TX = "0xed523aaf12afa7633651f82f9ed1cafc0d133a1712faa5f48b57a7c5f1958d15";
+export const CANONICAL_BRADBURY_RPC = "https://rpc-bradbury.genlayer.com";
 const viteEnv = import.meta.env || {};
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 const decimalPattern = /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)$/;
@@ -110,7 +112,7 @@ const contractAddress = typeof viteEnv.VITE_CONTRACT_ADDRESS === "string" ? vite
 const historicalRejectedContract = "0xEAA6Cb19AcB1E81e729224c590a5Cd5060D0c934";
 const configuredContractAddress = addressPattern.test(contractAddress)
   && contractAddress.toLowerCase() !== zeroAddress
-  && contractAddress.toLowerCase() !== historicalRejectedContract.toLowerCase()
+  && contractAddress.toLowerCase() === NIMBUSPACT_V2_CONTRACT_ADDRESS.toLowerCase()
   ? contractAddress
   : "";
 const requestedNetwork = typeof viteEnv.VITE_GENLAYER_NETWORK === "string" ? viteEnv.VITE_GENLAYER_NETWORK.trim() : "";
@@ -130,11 +132,17 @@ const rpcUrl = typeof viteEnv.VITE_GENLAYER_RPC_URL === "string" ? viteEnv.VITE_
 
 function normalizeRpcUrl(value: string): string { return value.trim().replace(/\/$/, "").toLowerCase(); }
 
-function runtimeConfigurationError(): string {
-  if (!configuredContractAddress) return "VITE_CONTRACT_ADDRESS is missing, malformed, or points to the rejected historical V1 deployment.";
-  if (!networkKey) return "VITE_GENLAYER_NETWORK must be one of localnet, studionet, testnetAsimov, or testnetBradbury.";
-  if (rpcUrl && normalizeRpcUrl(rpcUrl) !== normalizeRpcUrl(chainMeta[networkKey].rpc)) return `VITE_GENLAYER_RPC_URL must match the canonical ${chainMeta[networkKey].label} RPC.`;
+export function validateRuntimeConfiguration(contract: string, network: string, rpc: string): string {
+  if (!addressPattern.test(contract) || contract.toLowerCase() === zeroAddress) return "VITE_CONTRACT_ADDRESS is missing or malformed.";
+  if (contract.toLowerCase() === historicalRejectedContract.toLowerCase()) return "VITE_CONTRACT_ADDRESS points to the rejected historical V1 deployment.";
+  if (contract.toLowerCase() !== NIMBUSPACT_V2_CONTRACT_ADDRESS.toLowerCase()) return `VITE_CONTRACT_ADDRESS must point to NimbusPact V2 at ${NIMBUSPACT_V2_CONTRACT_ADDRESS}.`;
+  if (network !== "testnetBradbury") return "VITE_GENLAYER_NETWORK must be exactly testnetBradbury for NimbusPact V2.";
+  if (rpc && normalizeRpcUrl(rpc) !== normalizeRpcUrl(CANONICAL_BRADBURY_RPC)) return `VITE_GENLAYER_RPC_URL must match the canonical Bradbury RPC: ${CANONICAL_BRADBURY_RPC}.`;
   return "";
+}
+
+function runtimeConfigurationError(): string {
+  return validateRuntimeConfiguration(contractAddress, requestedNetwork, rpcUrl);
 }
 
 export interface RuntimeConfig {
@@ -308,7 +316,8 @@ function isDefinitivePreBroadcastFailure(error: unknown): boolean {
   const message = errorText(error).toLowerCase();
   return code === "4001"
     || code === "4902"
-    || /user rejected|user denied|rejected the request|request rejected|wrong network|unsupported chain|no browser wallet|provider.*unavailable|metamask.*not installed|insufficient funds|insufficient.*fee|fee policy.*mismatch|fee estimat|estimate.*fee|funding must exactly equal|value mismatch|request was not broadcast|writecontract.*before|execution reverted|contract.*revert|usererror|user error/.test(message);
+    || code === "-32601"
+    || /user rejected|user denied|rejected the request|request rejected|wrong network|unsupported chain|no browser wallet|provider.*unavailable|metamask.*not installed|insufficient funds|insufficient.*fee|fee policy.*mismatch|fee estimat|estimate.*fee|funding must exactly equal|value mismatch|request was not broadcast|writecontract.*before|execution reverted|contract.*revert|usererror|user error|method not found|unsupported rpc method|configured rpc.*does not support/.test(message);
 }
 
 async function waitForFinalized(hash: string): Promise<unknown> {
@@ -322,23 +331,42 @@ async function providerChainId(provider: Eip1193Provider): Promise<string> {
   return typeof chainId === "string" ? chainId.toLowerCase() : "";
 }
 
+interface BradburyReadOnlyClient {
+  getTransaction(options: { hash: string }): Promise<unknown>;
+  readContract(options: Record<string, unknown>): Promise<unknown>;
+}
+
+export async function verifyBradburyReadOnlyEvidence(client: BradburyReadOnlyClient): Promise<void> {
+  const deployment = await client.getTransaction({ hash: NIMBUSPACT_V2_DEPLOYMENT_TX });
+  const lifecycle = classifyReceipt(deployment, NIMBUSPACT_V2_DEPLOYMENT_TX);
+  if (lifecycle.state !== "SUCCESS") {
+    throw new Error("The configured Bradbury RPC did not return the finalized V2 deployment transaction.");
+  }
+  const deploymentRecord = record(deployment);
+  const recipient = asString(deploymentRecord.recipient);
+  if (recipient && recipient.toLowerCase() !== NIMBUSPACT_V2_CONTRACT_ADDRESS.toLowerCase()) {
+    throw new Error("The configured Bradbury RPC returned a deployment for a different contract address.");
+  }
+
+  const policyCount = await client.readContract({
+    address: NIMBUSPACT_V2_CONTRACT_ADDRESS,
+    functionName: "get_policy_count",
+    args: [],
+  });
+  try {
+    if (BigInt(asString(policyCount)) < 0n) throw new Error("negative policy count");
+  } catch {
+    throw new Error("The configured NimbusPact V2 contract did not return a valid policy count.");
+  }
+}
+
 async function verifyProviderBinding(provider: Eip1193Provider): Promise<void> {
   requireRuntimeConfiguration();
   const expectedChainId = `0x${chainMeta[networkKey!].chainId.toString(16)}`;
   if (await providerChainId(provider) !== expectedChainId) throw new Error(`Wallet is not connected to ${chainMeta[networkKey!].label}.`);
 
-  const consensusAddress = chainConfig!.consensusMainContract?.address;
   const canonicalClient = readClient();
-  if (!consensusAddress || !canonicalClient.getCode || !canonicalClient.request) throw new Error("The configured GenLayer client cannot verify the wallet network endpoint.");
-  const [canonicalEvmCode, walletEvmCode, canonicalIcCode, walletIcCode] = await Promise.all([
-    canonicalClient.getCode({ address: consensusAddress }),
-    provider.request({ method: "eth_getCode", params: [consensusAddress, "latest"] }),
-    canonicalClient.request({ method: "gen_getContractCode", params: [{ address: configuredContractAddress }] }),
-    provider.request({ method: "gen_getContractCode", params: [{ address: configuredContractAddress }] }),
-  ]);
-  if (typeof canonicalEvmCode !== "string" || canonicalEvmCode === "0x" || typeof walletEvmCode !== "string" || walletEvmCode === "0x" || canonicalEvmCode.toLowerCase() !== walletEvmCode.toLowerCase() || typeof canonicalIcCode !== "string" || typeof walletIcCode !== "string" || canonicalIcCode !== walletIcCode) {
-    throw new Error(`Wallet provider endpoint does not match the canonical ${chainMeta[networkKey!].label} RPC or V2 contract.`);
-  }
+  await verifyBradburyReadOnlyEvidence(canonicalClient);
 }
 
 async function ensureNetwork(_client: WalletClient): Promise<void> {

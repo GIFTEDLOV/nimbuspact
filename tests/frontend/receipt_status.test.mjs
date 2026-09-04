@@ -7,7 +7,14 @@ import {
   normalizeNetworkError,
   policyStatusMessage,
 } from "../../app/src/lib/receiptStatus.ts";
-import { buildWriteOptions, getRuntimeConfig } from "../../app/src/lib/nimbuspact.ts";
+import {
+  buildWriteOptions,
+  getRuntimeConfig,
+  validateRuntimeConfiguration,
+  verifyBradburyReadOnlyEvidence,
+  NIMBUSPACT_V2_CONTRACT_ADDRESS,
+  NIMBUSPACT_V2_DEPLOYMENT_TX,
+} from "../../app/src/lib/nimbuspact.ts";
 
 const HASH = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
 
@@ -154,4 +161,42 @@ test("missing network configuration fails closed instead of defaulting to Studio
   assert.equal(runtime.configured, false);
   assert.equal(runtime.network, "");
   assert.match(runtime.configurationError, /VITE_CONTRACT_ADDRESS|VITE_GENLAYER_NETWORK/);
+});
+
+test("Bradbury binding uses the supported deployment status and V2 view, never gen_getContractCode", async () => {
+  const calls = [];
+  const client = {
+    getTransaction: async ({ hash }) => {
+      calls.push("getTransaction");
+      assert.equal(hash, NIMBUSPACT_V2_DEPLOYMENT_TX);
+      return {
+        recipient: NIMBUSPACT_V2_CONTRACT_ADDRESS,
+        statusName: "FINALIZED",
+        resultName: "AGREE",
+        txExecutionResultName: "FINISHED_WITH_RETURN",
+      };
+    },
+    readContract: async (options) => {
+      calls.push("gen_call");
+      assert.deepEqual(options, { address: NIMBUSPACT_V2_CONTRACT_ADDRESS, functionName: "get_policy_count", args: [] });
+      return 0n;
+    },
+    request: async ({ method }) => {
+      calls.push(method);
+      throw new Error(`Unsupported method was called: ${method}`);
+    },
+  };
+
+  await verifyBradburyReadOnlyEvidence(client);
+  assert.deepEqual(calls, ["getTransaction", "gen_call"]);
+  assert.equal(calls.includes("gen_getContractCode"), false);
+});
+
+test("runtime binding rejects non-Bradbury networks, wrong RPCs, V1, and other contracts", () => {
+  assert.match(validateRuntimeConfiguration(NIMBUSPACT_V2_CONTRACT_ADDRESS, "testnetAsimov", "https://rpc-asimov.genlayer.com"), /exactly testnetBradbury/i);
+  assert.match(validateRuntimeConfiguration(NIMBUSPACT_V2_CONTRACT_ADDRESS, "studionet", "https://studio.genlayer.com/api"), /exactly testnetBradbury/i);
+  assert.match(validateRuntimeConfiguration(NIMBUSPACT_V2_CONTRACT_ADDRESS, "testnetBradbury", "https://rpc-asimov.genlayer.com"), /canonical Bradbury RPC/i);
+  assert.match(validateRuntimeConfiguration("0xEAA6Cb19AcB1E81e729224c590a5Cd5060D0c934", "testnetBradbury", "https://rpc-bradbury.genlayer.com"), /historical V1/i);
+  assert.match(validateRuntimeConfiguration("0x1111111111111111111111111111111111111111", "testnetBradbury", "https://rpc-bradbury.genlayer.com"), /NimbusPact V2/i);
+  assert.equal(validateRuntimeConfiguration(NIMBUSPACT_V2_CONTRACT_ADDRESS, "testnetBradbury", ""), "");
 });

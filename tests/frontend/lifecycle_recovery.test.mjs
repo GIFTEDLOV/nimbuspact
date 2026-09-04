@@ -7,6 +7,7 @@ import {
   releaseHashlessPending,
   runLifecycle,
 } from "../../app/src/lib/nimbuspact.ts";
+import { NetworkFailure } from "../../app/src/lib/receiptStatus.ts";
 
 const HASH = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
 const HASH_2 = "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd";
@@ -51,6 +52,7 @@ test("definitive wallet/provider failures release the hashless entry", async () 
     new Error("insufficient fee funding"),
     new Error("fee policy mismatch"),
     new Error("fee estimation failed"),
+    { code: -32601, message: "method [gen_getContractCode] doesn't has corresponding handler" },
     { message: "writeContract failed before broadcast", data: { detail: "request was not broadcast" } },
   ];
   for (const failure of failures) {
@@ -58,6 +60,23 @@ test("definitive wallet/provider failures release the hashless entry", async () 
     await rejected(runLifecycle(current, async () => null, async () => { throw failure; }, async () => ({})), /wallet|network|GEN|fee|transaction|failed/i);
     assert.deepEqual(getPendingTransactions(), []);
   }
+});
+
+test("pre-broadcast network binding failure preserves its diagnostic and releases the retry lock", async () => {
+  const current = entry("rpc-binding-failure");
+  const failure = new NetworkFailure(
+    "The configured RPC does not support this GenLayer operation. Check the Bradbury RPC and refresh before retrying.",
+    '{"code":-32601,"message":"method [gen_getContractCode] doesn\'t has corresponding handler"}',
+  );
+  let caught;
+  try {
+    await runLifecycle(current, async () => null, async () => { throw failure; }, async () => ({}));
+  } catch (error) {
+    caught = error;
+  }
+  assert.match(caught.message, /configured RPC does not support/i);
+  assert.match(caught.diagnostic, /-32601|gen_getContractCode/);
+  assert.deepEqual(getPendingTransactions(), []);
 });
 
 test("a wallet rejection can be retried without a stale local lock", async () => {
@@ -107,6 +126,13 @@ test("a saved hash is never rebroadcast and a timeout preserves that hash", asyn
   const result = await runLifecycle(current, async () => null, async () => { broadcasts += 1; return HASH_2; }, async () => ({ ok: true }), { waitForFinalized: async (hash) => { assert.equal(hash, HASH); throw new Error("request timed out"); } }).catch((error) => error);
   assert.equal(broadcasts, 0);
   assert.match(result.message, /original hash remains saved|could not be confirmed/i);
+  assert.equal(getPendingTransactions()[0].hash, HASH);
+});
+
+test("hash-bearing recovery cannot be released by the hashless recovery action", async () => {
+  const current = { ...entry("protected-hash"), hash: HASH, phase: "HASH_RETURNED" };
+  storage.set("nimbuspact.pending.v2", JSON.stringify([current]));
+  await rejected(releaseHashlessPending(current.actionKey), /hash is saved|reconcile/i);
   assert.equal(getPendingTransactions()[0].hash, HASH);
 });
 
