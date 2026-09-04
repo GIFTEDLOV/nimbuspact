@@ -100,6 +100,14 @@ Authoritative references: [Transaction Context](https://docs.genlayer.com/develo
 
 The v0.6 fee-profile workflow is deliberately not part of this Bradbury release. The installed Bradbury-compatible client does not expose that newer fee-profile lifecycle, so NimbusPact does not invent fee constants or pass `fees`, `feeValue`, `distribution`, or message-budget parameters. The payable contract value remains the exact policy escrow; ordinary network transaction fees remain distinct and are surfaced as transaction errors when the wallet cannot submit.
 
+## Forensic funding-pass corrections
+
+The release branch was audited against the actual `genlayer-js 1.1.8` package and Bradbury RPC. The old browser path persisted an empty transaction entry before calling the wallet, so a definite pre-broadcast rejection could leave a stale no-hash lock. The corrected path distinguishes broadcasting from a returned hash, removes entries for definite pre-broadcast failures, preserves any hash found in a nested SDK error, and never rebroadcasts a hash-bearing entry. An ambiguous hashless entry is checked against the immutable policy fingerprint and can be released only through an explicit user action after confirming that the wallet did not approve a request.
+
+The old `client.connect()` Snap path is not required by this installed Bradbury client. The corrected browser path switches the EIP-1193 wallet directly to chain `4221`, verifies the canonical Bradbury RPC and V2 Intelligent Contract code, and fails closed instead of silently falling back to Studionet or the rejected V1 address. Finalization uses `waitForFinalization({ hash })` when a compatible client provides it and the installed client's legacy finalized receipt adapter otherwise; success still requires `FINALIZED` and `FINISHED_WITH_RETURN`. The exact raw object from the earlier owner attempt cannot be recovered because the old UI replaced it with the later no-hash wrapper; this release retains structured diagnostics for future failures.
+
+The default form now creates a valid future UTC window (`start <= end`) and the error boundary recursively handles wallet, RPC, fee, contract, receipt, nested-cause, BigInt, and unknown-object failures without rendering `[object Object]`.
+
 ## Historical rejected V1 evidence
 
 The previously submitted deployment is preserved as historical evidence and is not represented as V2:
@@ -179,5 +187,7 @@ The repository does not store private keys. Public frontend configuration uses `
 - `tests/direct/test_nimbuspact.py` — deterministic V2 transition and economic regression coverage.
 - `tests/frontend/receipt_status.test.mjs` — receipt, structured-error, and escrow-versus-fee regressions.
 - `docs/live-proof/bradbury-smoke.json` — preserved rejected V1 evidence.
+
+- `tests/frontend/lifecycle_recovery.test.mjs` — deterministic pre-broadcast, hash recovery, timeout, and default-date regressions.
 
 NimbusPact is MIT-licensed; see [`LICENSE`](LICENSE).

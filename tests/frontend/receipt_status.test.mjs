@@ -3,10 +3,11 @@ import test from "node:test";
 import {
   classifyLifecycleError,
   classifyReceipt,
+  formatNetworkError,
   normalizeNetworkError,
   policyStatusMessage,
 } from "../../app/src/lib/receiptStatus.ts";
-import { buildWriteOptions } from "../../app/src/lib/nimbuspact.ts";
+import { buildWriteOptions, getRuntimeConfig } from "../../app/src/lib/nimbuspact.ts";
 
 const HASH = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
 
@@ -93,11 +94,17 @@ test("keeps exact payable escrow value separate from network transaction handlin
 test("maps the reviewer-facing contract and protocol failure cases", () => {
   const cases = [
     [{ code: 4001 }, /wallet request was rejected/i],
+    [{ message: "provider unavailable" }, /compatible browser wallet|available/i],
+    [{ code: 4902, message: "unsupported chain" }, /wrong network/i],
+    [{ message: "insufficient escrow balance" }, /enough GEN/i],
     [{ message: "insufficient fee funding" }, /needs more GEN.*transaction/i],
     [{ message: "fee policy mismatch" }, /stale|fee policy changed/i],
+    [{ message: "fee estimation failed" }, /fee could not be prepared/i],
+    [{ code: -32601, message: "method not found" }, /RPC does not support/i],
     [{ message: "Observation window is still open" }, /locked until.*closes/i],
     [{ message: "Refund is not eligible until the recovery grace period expires" }, /not refund-eligible/i],
     [{ message: "This payout is not currently claimable" }, /not claimable/i],
+    [{ message: "UNDETERMINED" }, /conclusive result|original transaction hash/i],
     [{ message: "validators timeout" }, /did not finish in time/i],
     [{ message: "execution reverted" }, /contract rejected/i],
   ];
@@ -111,4 +118,40 @@ test("fails closed when a finalized receipt omits the transaction execution resu
   }, HASH);
   assert.equal(result.state, "EXECUTION_FAILED");
   assert.equal(result.executionSucceeded, false);
+});
+
+test("does not treat an application lifecycle label as execution success", () => {
+  const result = classifyReceipt({ statusName: "FINALIZED", lifecycle: "finalized-success" }, HASH);
+  assert.equal(result.state, "EXECUTION_FAILED");
+  assert.equal(result.executionSucceeded, false);
+});
+
+test("normalizes Error instances with their actual message and bounded diagnostics", () => {
+  const error = new Error("RPC admission rejected");
+  const normalized = normalizeNetworkError(error);
+  assert.match(normalized.headline, /transaction request failed|admission/i);
+  assert.match(normalized.diagnostic, /RPC admission rejected/);
+  assert.doesNotMatch(`${normalized.headline} ${normalized.diagnostic}`, /\[object Object\]/i);
+});
+
+test("recursively maps nested provider codes and nested receipt outcomes", () => {
+  assert.match(normalizeNetworkError({ cause: { error: { code: 4001, message: "User denied" } } }).headline, /rejected/i);
+  const lifecycle = classifyLifecycleError({ cause: { receipt: receipt() } }, HASH);
+  assert.equal(lifecycle.state, "SUCCESS");
+  assert.equal(lifecycle.finalized, true);
+});
+
+test("never exposes object coercion even when the provider returns arbitrary objects", () => {
+  const unknown = { response: { data: { payload: { nested: { value: 1n } } } } };
+  const formatted = formatNetworkError(unknown);
+  const normalized = normalizeNetworkError(unknown);
+  assert.doesNotMatch(`${formatted} ${normalized.diagnostic}`, /\[object Object\]/i);
+  assert.match(normalized.diagnostic, /1n|nested/);
+});
+
+test("missing network configuration fails closed instead of defaulting to Studionet", () => {
+  const runtime = getRuntimeConfig();
+  assert.equal(runtime.configured, false);
+  assert.equal(runtime.network, "");
+  assert.match(runtime.configurationError, /VITE_CONTRACT_ADDRESS|VITE_GENLAYER_NETWORK/);
 });

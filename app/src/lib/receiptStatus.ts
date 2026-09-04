@@ -74,7 +74,11 @@ function record(value: unknown): UnknownRecord {
 }
 
 function enumName(value: unknown, numericNames: Record<number, string>): string {
-  if (typeof value === "string") return value;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (/^\d+$/.test(trimmed)) return numericNames[Number(trimmed)] || "";
+    return trimmed.toUpperCase().replace(/\s+/g, "_");
+  }
   return typeof value === "number" ? numericNames[value] || "" : "";
 }
 
@@ -102,18 +106,52 @@ export function unresolvedOutcome(
   return outcome(state, hash, false, false, true, "warning", message);
 }
 
+function jsonValue(value: unknown, seen: WeakSet<object>, depth = 0): unknown {
+  if (depth > 6) return "[MaxDepth]";
+  if (value === null || value === undefined) return value;
+  if (typeof value === "bigint") return `${value.toString()}n`;
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return value;
+  if (typeof value === "function" || typeof value === "symbol") return String(value);
+  if (typeof value !== "object") return String(value);
+  if (seen.has(value)) return "[Circular]";
+  seen.add(value);
+
+  if (value instanceof Error) {
+    const error = value as Error & { cause?: unknown; code?: unknown; details?: unknown; shortMessage?: unknown };
+    return {
+      name: error.name,
+      message: error.message,
+      shortMessage: error.shortMessage,
+      details: error.details,
+      code: error.code,
+      diagnostic: (error as Error & { diagnostic?: unknown }).diagnostic,
+      stack: error.stack,
+      cause: error.cause === value ? "[Circular]" : jsonValue(error.cause, seen, depth + 1),
+    };
+  }
+  if (value instanceof Map) {
+    return Object.fromEntries([...value.entries()].map(([key, item]) => [String(key), jsonValue(item, seen, depth + 1)]));
+  }
+  if (value instanceof Set) return [...value].map((item) => jsonValue(item, seen, depth + 1));
+  if (Array.isArray(value)) return value.map((item) => jsonValue(item, seen, depth + 1));
+
+  const raw = value as UnknownRecord;
+  const result: UnknownRecord = {};
+  for (const key of Object.keys(raw)) {
+    try { result[key] = jsonValue(raw[key], seen, depth + 1); } catch { result[key] = "[Unreadable]"; }
+  }
+  for (const key of ["message", "shortMessage", "details", "reason", "code", "data", "error", "cause", "receipt", "transaction", "status", "statusName", "txExecutionResultName"]) {
+    if (!(key in result) && key in raw) {
+      try { result[key] = jsonValue(raw[key], seen, depth + 1); } catch { result[key] = "[Unreadable]"; }
+    }
+  }
+  return result;
+}
+
 function safeJson(value: unknown, maxLength = 1800): string {
-  const seen = new WeakSet<object>();
   try {
-    const json = JSON.stringify(value, (_key, nested) => {
-      if (typeof nested === "bigint") return `${nested.toString()}n`;
-      if (nested && typeof nested === "object") {
-        if (seen.has(nested)) return "[Circular]";
-        seen.add(nested);
-      }
-      return nested;
-    });
-    if (json && json !== "{}") return json.slice(0, maxLength);
+    const json = JSON.stringify(jsonValue(value, new WeakSet<object>()));
+    if (json && json !== "{}") return json.slice(0, maxLength).replace(/\[object Object\]/g, "[unreadable object]");
   } catch {
     // Fall through to the bounded generic diagnostic below.
   }
@@ -121,9 +159,12 @@ function safeJson(value: unknown, maxLength = 1800): string {
 }
 
 const ERROR_FIELDS = [
+  "name",
+  "errorName",
   "message",
   "shortMessage",
   "details",
+  "diagnostic",
   "reason",
   "code",
   "data",
@@ -145,6 +186,11 @@ const ERROR_FIELDS = [
   "consensusResult",
   "executionResult",
   "lifecycle",
+  "transactionHash",
+  "txHash",
+  "transaction_hash",
+  "txId",
+  "transactionId",
 ];
 
 function collectErrorParts(value: unknown, parts: string[], seen: WeakSet<object>, depth = 0): void {
@@ -175,21 +221,47 @@ function collectErrorParts(value: unknown, parts: string[], seen: WeakSet<object
 export function errorText(error: unknown): string {
   const parts: string[] = [];
   collectErrorParts(error, parts, new WeakSet<object>());
-  return [...new Set(parts)].join(" | ");
+  return [...new Set(parts)].join(" | ").replace(/\[object Object\]/g, "[unreadable object]");
+}
+
+function errorCode(error: unknown): string {
+  const values: string[] = [];
+  const visit = (value: unknown, seen: WeakSet<object>, depth = 0): void => {
+    if (depth > 5 || value === null || value === undefined) return;
+    if (typeof value !== "object") return;
+    if (seen.has(value)) return;
+    seen.add(value);
+    const raw = value as UnknownRecord;
+    if (typeof raw.code === "string" || typeof raw.code === "number" || typeof raw.code === "bigint") values.push(String(raw.code));
+    for (const field of ["error", "cause", "data", "originalError", "rpcError", "response", "body"]) visit(raw[field], seen, depth + 1);
+  };
+  visit(error, new WeakSet<object>());
+  return values[0] || "";
 }
 
 export function normalizeNetworkError(error: unknown): NormalizedNetworkError {
   const text = errorText(error);
   const lower = text.toLowerCase();
-  const raw = record(error);
-  const code = raw.code;
+  const code = errorCode(error);
   const diagnostic = safeJson(error);
 
-  if (code === 4001 || /user rejected|user denied|rejected the request|request rejected|denied|user canceled|user cancelled/.test(lower)) {
+  if (code === "4001" || /user rejected|user denied|rejected the request|request rejected|denied|user canceled|user cancelled/.test(lower)) {
     return { headline: "The wallet request was rejected. No transaction was broadcast.", diagnostic };
   }
-  if (code === 4902 || /wrong network|chain id|chainid|wallet.*network|network.*wallet|switch.*network|unsupported chain/.test(lower)) {
+  if (code === "4902" || /wrong network|chain id|chainid|wallet.*network|network.*wallet|switch.*network|unsupported chain|wallet is connected to asimov|provider endpoint/.test(lower)) {
     return { headline: "Your wallet is on the wrong network. Switch to the configured GenLayer network and try again.", diagnostic };
+  }
+  if (/no browser wallet|metamask is not installed|provider.*unavailable|no compatible wallet|wallet provider.*not found/.test(lower)) {
+    return { headline: "No compatible browser wallet is available. Install or unlock a wallet and try again.", diagnostic };
+  }
+  if (/wallet provider.*does not support|method not found.*wallet_|unsupported wallet method/.test(lower)) {
+    return { headline: "This wallet provider cannot switch to the configured GenLayer network. Use a compatible browser wallet and try again.", diagnostic };
+  }
+  if (code === "-32601" || /method not found|unsupported rpc method|rpc method.*not supported/.test(lower)) {
+    return { headline: "The configured RPC does not support this GenLayer operation. Check the Bradbury RPC and refresh before retrying.", diagnostic };
+  }
+  if (/fee estimat|estimate.*fee/.test(lower)) {
+    return { headline: "The network fee could not be prepared. Refresh the page and try again; the policy escrow amount is unchanged.", diagnostic };
   }
   if (/fee policy|fee-policy|stale quote|quote.*stale|policy.*mismatch|mismatch.*policy|price cap|cap.*price/.test(lower)) {
     return { headline: "The network fee policy changed or the request is stale. Refresh the page and sign again.", diagnostic };
@@ -197,10 +269,10 @@ export function normalizeNetworkError(error: unknown): NormalizedNetworkError {
   if (/insufficient.*fee|fee.*insufficient|feevalue|fee value|protocol fee|fee deposit|not enough.*fee|execution budget/.test(lower)) {
     return { headline: "The wallet needs more GEN to submit this transaction. Keep the policy escrow amount unchanged and try again.", diagnostic };
   }
-  if (/insufficient funds|insufficient wallet|balance.*low|not enough gen|not enough.*balance/.test(lower)) {
+  if (/insufficient funds|insufficient wallet|insufficient.*escrow|escrow.*insufficient|balance.*low|not enough gen|not enough.*balance/.test(lower)) {
     return { headline: "The wallet does not have enough GEN for the policy escrow and network transaction fee.", diagnostic };
   }
-  if (code === 429 || /rate limit|too many requests|rpc admission|admission queue|temporarily unavailable/.test(lower)) {
+  if (code === "429" || code === "-32005" || /rate limit|too many requests|rpc admission|admission queue|temporarily unavailable/.test(lower)) {
     return { headline: "Bradbury RPC admission is busy or rate-limited. Wait briefly and retry once.", diagnostic };
   }
   if (/transaction canceled|transaction cancelled|cancelled|canceled/.test(lower)) {
@@ -238,8 +310,21 @@ export function formatNetworkError(error: unknown): string {
   return normalizeNetworkError(error).headline;
 }
 
+function findReceipt(value: unknown, seen: WeakSet<object>, depth = 0): UnknownRecord | null {
+  if (depth > 5 || value === null || value === undefined || typeof value !== "object") return null;
+  if (seen.has(value)) return null;
+  seen.add(value);
+  const raw = value as UnknownRecord;
+  if (raw.statusName !== undefined || raw.status !== undefined || raw.txExecutionResultName !== undefined || raw.txExecutionResult !== undefined) return raw;
+  for (const field of ["receipt", "transaction", "outcome", "result", "data", "cause", "error"]) {
+    const nested = findReceipt(raw[field], seen, depth + 1);
+    if (nested) return nested;
+  }
+  return null;
+}
+
 export function classifyReceipt(receipt: unknown, hash: string): LifecycleOutcome {
-  const raw = record(receipt);
+  const raw = findReceipt(receipt, new WeakSet<object>()) || record(receipt);
   const status = enumName(raw.statusName ?? raw.status, STATUS_BY_NUMBER);
   const result = enumName(raw.resultName ?? raw.result, RESULT_BY_NUMBER);
   const execution = enumName(raw.txExecutionResultName ?? raw.txExecutionResult ?? raw.executionResult, EXECUTION_BY_NUMBER);
@@ -278,7 +363,7 @@ export function classifyReceipt(receipt: unknown, hash: string): LifecycleOutcom
     );
   }
 
-  if (execution === "FINISHED_WITH_RETURN" || raw.lifecycle === "finalized-success") {
+  if (execution === "FINISHED_WITH_RETURN") {
     return outcome("SUCCESS", hash, true, true, false, "success", `Transaction ${shortHash(hash)} finalized successfully.`);
   }
 
@@ -295,14 +380,15 @@ export function classifyReceipt(receipt: unknown, hash: string): LifecycleOutcom
 
 export function classifyLifecycleError(error: unknown, hash: string): LifecycleOutcome {
   const raw = record(error);
-  const nested = raw.receipt || raw.transaction || raw;
+  const nested = findReceipt(error, new WeakSet<object>()) || raw;
   const receipt = classifyReceipt(nested, hash);
   if (
     receipt.state !== "PENDING" ||
     raw.statusName !== undefined ||
     raw.status !== undefined ||
     raw.receipt !== undefined ||
-    raw.transaction !== undefined
+    raw.transaction !== undefined ||
+    findReceipt(error, new WeakSet<object>()) !== null
   ) return receipt;
 
   const message = errorText(error);

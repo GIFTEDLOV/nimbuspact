@@ -3,6 +3,7 @@
     <div class="release-strip">
       <span>NIMBUSPACT V2 · BRADBURY RELEASE</span>
       <span class="release-strip-copy">Exact escrow funding, finalized settlement, and safe recovery</span>
+      <span class="release-strip-copy" data-runtime-binding>IC {{ runtimeConfig.contractAddress || "unconfigured" }} · {{ runtimeConfig.networkLabel }}</span>
       <a href="https://github.com/GIFTEDLOV/nimbuspact/blob/master/docs/live-proof/bradbury-smoke.json" target="_blank" rel="noreferrer">
         View historical proof <ArrowUpRight :size="13" />
       </a>
@@ -156,16 +157,16 @@
 
               <div class="fee-summary" aria-live="polite">
                 <div><span>Policy escrow</span><strong>{{ form.payout || "0" }} GEN</strong></div>
-                <div><span>Network transaction fee</span><strong>Separate</strong></div>
+                <div><span>Wallet network fee</span><strong>Separate</strong></div>
               </div>
-              <p class="form-hint">Fund your wallet for the exact escrow plus the network transaction fee requested by Bradbury at signing time.</p>
+              <p class="form-hint">This Bradbury release sends the exact escrow as the payable value. The wallet/provider handles any network transaction charge separately; no unsupported v0.6 fee deposit is added to escrow.</p>
 
               <button class="submit-button" type="submit" :disabled="busy || !configured || !walletAddress">
                 <LoaderCircle v-if="busy" class="spinning" :size="16" />
                 <span v-else>Fund policy</span>
                 <ArrowUpRight v-if="!busy" :size="15" />
               </button>
-              <p v-if="!configured" class="form-hint warning-copy">Add VITE_CONTRACT_ADDRESS to connect this interface to a deployed NimbusPact IC.</p>
+              <p v-if="!configured" class="form-hint warning-copy">{{ runtimeConfig.configurationError }}</p>
               <p v-else-if="!walletAddress" class="form-hint">Connect a wallet on {{ networkLabel }} to fund a policy.</p>
             </form>
           </section>
@@ -176,9 +177,10 @@
               <div>
                 <strong>Submission recovery is active</strong>
                 <span v-if="recovery[0]?.hash">{{ recovery.length }} transaction{{ recovery.length === 1 ? "" : "s" }} remain linked to the saved hash{{ recovery.length === 1 ? " " + shortHash(recovery[0]?.hash || "") : "es" }}. NimbusPact will reconcile, not rebroadcast.</span>
-                <span v-else>A previous submission did not return a hash. Refresh state before attempting another submission; NimbusPact will not rebroadcast it automatically.</span>
+                <span v-else>No transaction ID was returned. NimbusPact checked policy state and will not rebroadcast an unknown request automatically. Release the local lock only after confirming the wallet did not approve a request.</span>
               </div>
-              <button class="inline-button" :disabled="loading" @click="refresh"><RefreshCw :size="13" /> Check again</button>
+              <button v-if="recovery[0]?.hash" class="inline-button" :disabled="loading" @click="refresh"><RefreshCw :size="13" /> Check again</button>
+              <button v-else class="inline-button" :disabled="loading" @click="releaseRecovery(recovery[0])">Release no-hash lock</button>
             </div>
 
             <div v-if="!policies.length && !loading" class="empty-state">
@@ -291,10 +293,12 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { AlertTriangle, ArrowDownRight, ArrowUpRight, CircleCheck, CloudRain, CloudSun, Clock3, Code2, Database, Fingerprint, HandCoins, LoaderCircle, LockKeyhole, Radar, RefreshCw, ShieldCheck, UserRound, WalletCards } from "lucide-vue-next";
-import { canRefundPolicy, canRetryResolution, claimPayout, connectWallet, createPolicy, formatUtcTimestamp, getContractAddress, getNetworkLabel, getPendingTransactions, getPolicies, observationCloseTimestamp, recoverPendingTransactions, refundAvailableTimestamp, refundPolicy, resolvePolicy, type NoticeKind, type Policy, type PolicyInput } from "./lib/nimbuspact";
+import { canRefundPolicy, canRetryResolution, claimPayout, connectWallet, createPolicy, formatUtcTimestamp, getNetworkLabel, getPendingTransactions, getPolicies, getRuntimeConfig, observationCloseTimestamp, recoverPendingTransactions, refundAvailableTimestamp, refundPolicy, releaseHashlessPending, resolvePolicy, type NoticeKind, type Policy, type PolicyInput, type RecoveryMessage } from "./lib/nimbuspact";
 import { NetworkFailure, normalizeNetworkError, policyStatusMessage } from "./lib/receiptStatus";
+import { defaultObservationDates } from "./lib/policyDates";
 
-const configured = Boolean(getContractAddress());
+const runtimeConfig = getRuntimeConfig();
+const configured = runtimeConfig.configured;
 const networkLabel = getNetworkLabel();
 const walletAddress = ref<string | null>(null);
 const policies = ref<Policy[]>([]);
@@ -304,18 +308,8 @@ const busy = ref(false);
 const recovery = ref(getPendingTransactions());
 const notice = ref<{ kind: NoticeKind; message: string; diagnostic?: string } | null>(null);
 
-function dateString(date: Date): string {
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-const end = new Date();
-end.setUTCDate(end.getUTCDate() + 2);
-const start = new Date(end);
-start.setUTCDate(start.getUTCDate() + 1);
-const form = ref<PolicyInput>({ locationName: "Lagos Island", latitude: "6.5244", longitude: "3.3792", startDate: dateString(start), endDate: dateString(end), triggerType: "HEAVY_RAIN", threshold: "50", beneficiary: "", payout: "0.25" });
+const defaultDates = defaultObservationDates();
+const form = ref<PolicyInput>({ locationName: "Lagos Island", latitude: "6.5244", longitude: "3.3792", startDate: defaultDates.startDate, endDate: defaultDates.endDate, triggerType: "HEAVY_RAIN", threshold: "50", beneficiary: "", payout: "0.25" });
 
 const thresholdUnit = computed(() => form.value.triggerType === "HEAVY_RAIN" ? "mm" : form.value.triggerType === "EXTREME_HEAT" ? "°C" : "km/h");
 const lockedCollateral = computed(() => {
@@ -339,6 +333,14 @@ function resolutionWindowClosed(policy: Policy): boolean {
 }
 function canRetry(policy: Policy): boolean { return canRetryResolution(policy); }
 function canRefund(policy: Policy): boolean { return Boolean(walletAddress.value) && canRefundPolicy(policy, walletAddress.value || ""); }
+async function releaseRecovery(entry: { actionKey: string } | undefined): Promise<void> {
+  if (!entry) return;
+  try {
+    const result: RecoveryMessage = await releaseHashlessPending(entry.actionKey);
+    showNotice(result.kind, result.message, result.diagnostic);
+    recovery.value = getPendingTransactions();
+  } catch (error) { showError(error, "The no-hash recovery entry could not be released."); }
+}
 
 async function handleWallet(): Promise<void> {
   if (walletAddress.value) return;
