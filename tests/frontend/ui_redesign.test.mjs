@@ -37,6 +37,12 @@ test("cover states expose human actions without raw enum-first presentation", ()
   assert.match(appSource, /Evidence unavailable/);
   assert.match(appSource, /Observation closes/);
   assert.match(appSource, /Refund available after/);
+  assert.match(appSource, /class="coverage-layout"/);
+  assert.match(appSource, /label: "Verification"/);
+  assert.match(appSource, /View details/);
+  assert.match(appSource, /readableDateRange/);
+  assert.doesNotMatch(appSource, /formatUtcTimestamp/);
+  assert.match(styleSource, /\.coverage-layout \{ display: grid/);
 });
 
 test("technical diagnostics are collapsed and user-facing error copy is safe", () => {
