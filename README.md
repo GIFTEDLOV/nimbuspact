@@ -6,16 +6,17 @@ NimbusPact is a Testnet Bradbury demonstration, not mainnet insurance or a regul
 
 ## Release status
 
-The V2 source and controlled state-machine coverage are in this repository. Bradbury has finalized the single compatible V2 deployment below. The browser funding proof remains a release gate, so this README does not claim live funding until that evidence is recorded.
+The V2 source and controlled state-machine coverage are in this repository. Bradbury has finalized the single compatible V2 deployment below, and the browser funding proof is recorded in the live release evidence.
 
 | Surface | Value |
 | --- | --- |
 | Repository | [github.com/GIFTEDLOV/nimbuspact](https://github.com/GIFTEDLOV/nimbuspact) |
-| Historical V1 application | [nimbuspact.vercel.app](https://nimbuspact.vercel.app) |
+| Historical V1 evidence | [`docs/live-proof/bradbury-smoke.json`](docs/live-proof/bradbury-smoke.json) |
 | Target network | Testnet Bradbury |
 | RPC | `https://rpc-bradbury.genlayer.com` |
 | Current V2 contract | `0x055F97140CE35FD1e656ebb3D204952A46646681` (finalized) |
-| Current V2 app | Pending V2 funding proof |
+| Current V2 app | [nimbuspact.vercel.app](https://nimbuspact.vercel.app) |
+| Live browser funding proof | `p-1` · `0.01 GEN` · `FINALIZED / FINISHED_WITH_RETURN / 5/5 AGREE` |
 
 ## Changes after reviewer feedback
 
@@ -104,7 +105,7 @@ The v0.6 fee-profile workflow is deliberately not part of this Bradbury release.
 
 The release branch was audited against the actual `genlayer-js 1.1.8` package and Bradbury RPC. The old browser path persisted an empty transaction entry before calling the wallet, so a definite pre-broadcast rejection could leave a stale no-hash lock. The corrected path distinguishes broadcasting from a returned hash, removes entries for definite pre-broadcast failures, preserves any hash found in a nested SDK error, and never rebroadcasts a hash-bearing entry. An ambiguous hashless entry is checked against the immutable policy fingerprint and can be released only through an explicit user action after confirming that the wallet did not approve a request.
 
-The old `client.connect()` Snap path is not required by this installed Bradbury client. The corrected browser path switches the EIP-1193 wallet directly to chain `4221`, verifies the canonical Bradbury RPC and V2 Intelligent Contract code, and fails closed instead of silently falling back to Studionet or the rejected V1 address. Finalization uses `waitForFinalization({ hash })` when a compatible client provides it and the installed client's legacy finalized receipt adapter otherwise; success still requires `FINALIZED` and `FINISHED_WITH_RETURN`. The exact raw object from the earlier owner attempt cannot be recovered because the old UI replaced it with the later no-hash wrapper; this release retains structured diagnostics for future failures.
+The old `client.connect()` Snap path is not required by this installed Bradbury client. The corrected browser path switches the EIP-1193 wallet directly to chain `4221`, verifies the canonical Bradbury RPC and V2 deployment/view evidence, and fails closed instead of silently falling back to Studionet or the rejected V1 address. Finalization uses `waitForFinalization({ hash })` when a compatible client provides it and the installed client's legacy finalized receipt adapter otherwise; success still requires `FINALIZED` and `FINISHED_WITH_RETURN`. The exact raw object from the earlier owner attempt cannot be recovered because the old UI replaced it with the later no-hash wrapper; this release retains structured diagnostics for future failures.
 
 The default form now creates a valid future UTC window (`start <= end`) and the error boundary recursively handles wallet, RPC, fee, contract, receipt, nested-cause, BigInt, and unknown-object failures without rendering `[object Object]`.
 
@@ -127,7 +128,7 @@ The preserved reverted wrapper transaction is `0xbe2fd099ec7f1b52db4a412bd2b5870
 
 The direct suite uses deterministic transaction timestamps and controlled weather responses to prove every V2 transition, including the 24-hour grace boundary. This is **controlled integration proof**, not a live weather assertion.
 
-The **LIVE BRADBURY PROOF** section below is intentionally empty until one funded policy is created through the public V2 browser flow with a funded test account. A CLI write or direct RPC call is not a substitute for that frontend proof.
+The **LIVE BRADBURY PROOF** section below records one funded policy created through the public V2 browser flow with a funded test account. A CLI write or direct RPC call is not a substitute for that frontend proof.
 
 ### LIVE BRADBURY PROOF
 
@@ -136,12 +137,13 @@ The **LIVE BRADBURY PROOF** section below is intentionally empty until one funde
 | New V2 contract | `0x055F97140CE35FD1e656ebb3D204952A46646681` |
 | Deployment transaction | `0xed523aaf12afa7633651f82f9ed1cafc0d133a1712faa5f48b57a7c5f1958d15` |
 | Deployment status | `FINALIZED / FINISHED_WITH_RETURN / AGREE` |
-| Preview / production URL | Pending |
-| Browser wallet | Pending |
-| Live create transaction | Pending |
-| Live policy ID | Pending |
-| Escrow balance check | Pending |
-| Exact escrow value sent | Pending |
+| Preview / production URL | [nimbuspact.vercel.app](https://nimbuspact.vercel.app) |
+| Browser wallet | Proven through the V2 browser flow |
+| Live create transaction | `0xef9d035c4d7714774fda42efa72b07d02a89dda851d8ab7dac5ac8366c2e3c56` |
+| Live policy ID | `p-1` (`ACTIVE`) |
+| Escrow balance check | Policy stores exactly `0.01 GEN`; policy count is `1` |
+| Exact escrow value sent | `0.01 GEN` |
+| Live create result | `FINALIZED` · `FINISHED_WITH_RETURN` · `AGREE` · `5/5 validators AGREE` |
 
 ## Local checks
 
