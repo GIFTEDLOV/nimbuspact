@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 CONTRACT_PATH = ROOT / "contracts" / "nimbuspact.py"
 README_PATH = ROOT / "README.md"
 ENV_PATH = ROOT / "app" / ".env.example"
-PROOF_PATH = ROOT / "docs" / "live-proof" / "bradbury-smoke.json"
+PROOF_PATH = ROOT / "docs" / "history" / "v1" / "bradbury-smoke.json"
 COMPATIBILITY_PATH = ROOT / "docs" / "rejection-remediation" / "bradbury-compatibility.json"
 
 EXPECTED_REJECTED_SOURCE_SHA256 = "1a6386e22ffc60d8beae3640569bf25ec6582c7896bb565bb1b161b96810e310"

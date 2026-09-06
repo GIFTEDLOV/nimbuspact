@@ -6,12 +6,14 @@ NimbusPact is a Testnet Bradbury demonstration, not mainnet insurance or a regul
 
 ## Release status
 
+Current reviewer status and independently saved production/funding evidence: [September remediation package](docs/reviewer-remediation-2026-09/README.md). The package distinguishes checked source remediation from deployment and live proofs still awaiting authorization.
+
 The V2 source and controlled state-machine coverage are in this repository. Bradbury has finalized the single compatible V2 deployment below, and the browser funding proof is recorded in the live release evidence.
 
 | Surface | Value |
 | --- | --- |
 | Repository | [github.com/GIFTEDLOV/nimbuspact](https://github.com/GIFTEDLOV/nimbuspact) |
-| Historical V1 evidence | [`docs/live-proof/bradbury-smoke.json`](docs/live-proof/bradbury-smoke.json) |
+| Historical V1 evidence | [`docs/history/v1/bradbury-smoke.json`](docs/history/v1/bradbury-smoke.json) |
 | Target network | Testnet Bradbury |
 | RPC | `https://rpc-bradbury.genlayer.com` |
 | Current V2 contract | `0x055F97140CE35FD1e656ebb3D204952A46646681` (finalized) |
@@ -118,7 +120,7 @@ The previously submitted deployment is preserved as historical evidence and is n
 | Contract | `0xEAA6Cb19AcB1E81e729224c590a5Cd5060D0c934` |
 | Deployment transaction | `0xf02ddbb1fa117ad1dbbabf32dfc41f912fb7d4ac42eda77e9f5130c8186610db` |
 | V1 source SHA-256 | `1a6386e22ffc60d8beae3640569bf25ec6582c7896bb565bb1b161b96810e310` |
-| Evidence | [`docs/live-proof/bradbury-smoke.json`](docs/live-proof/bradbury-smoke.json) |
+| Evidence | [`docs/history/v1/bradbury-smoke.json`](docs/history/v1/bradbury-smoke.json) |
 
 That proof remains useful historical evidence for the old create/resolve/claim path and its reverted wrapper attempt. It does not prove the V2 source or V2 funding flow. The rejected V1 lacked contract-side observation enforcement, retry/refund recovery, and fee-aware browser funding.
 
@@ -188,7 +190,7 @@ The repository does not store private keys. Public frontend configuration uses `
 - `app/src/lib/receiptStatus.ts` — finality/execution classification and the single error-normalization boundary.
 - `tests/direct/test_nimbuspact.py` — deterministic V2 transition and economic regression coverage.
 - `tests/frontend/receipt_status.test.mjs` — receipt, structured-error, and escrow-versus-fee regressions.
-- `docs/live-proof/bradbury-smoke.json` — preserved rejected V1 evidence.
+- `docs/history/v1/bradbury-smoke.json` — preserved rejected V1 evidence.
 
 - `tests/frontend/lifecycle_recovery.test.mjs` — deterministic pre-broadcast, hash recovery, timeout, and default-date regressions.
 

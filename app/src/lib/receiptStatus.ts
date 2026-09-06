@@ -215,7 +215,9 @@ function collectErrorParts(value: unknown, parts: string[], seen: WeakSet<object
   for (const field of ERROR_FIELDS) {
     if (field in raw) collectErrorParts(raw[field], parts, seen, depth + 1);
   }
-  if (value instanceof Error && value.stack) parts.push(value.stack);
+  // Stack frames are diagnostics, not transaction outcomes. For example,
+  // processTicksAndRejections must not turn a polling timeout into rejection.
+  // safeJson retains the stack in the expandable diagnostic separately.
 }
 
 export function errorText(error: unknown): string {

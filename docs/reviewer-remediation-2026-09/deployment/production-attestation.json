@@ -1,0 +1,64 @@
+{
+  "production_url": "https://nimbuspact.vercel.app",
+  "retrieved_at_utc": "2026-09-06T20:32:46.637Z",
+  "repository_head": "e27ebeb677f3ca8ad5f04b31b1a7fd659d9792c7",
+  "production_deployment_identifier": null,
+  "immutable_deployment_url": "https://nimbuspact-8hgdjvssm-kolofahkelvin16-6437s-projects.vercel.app",
+  "loaded_assets": [
+    {
+      "url": "https://nimbuspact.vercel.app/assets/index-C5x04iXC.js",
+      "sha256": "467ae5b69052bf30add1f1cd15507a12c1a2bc6daf2013c86a896601898e6158",
+      "http_status": 200
+    },
+    {
+      "url": "https://nimbuspact.vercel.app/assets/index-4A4ficFo.css",
+      "sha256": "bd3598e37aa902b5af86e3672433aabd6e13c8d54bd8f8c6b9ff25614aa1d237",
+      "http_status": 200
+    }
+  ],
+  "html_sha256": "83ce3f8a02395db5106102675855d9611e8acb6a1d14184c439a5f0ab0b53bcf",
+  "main_js_sha256": "467ae5b69052bf30add1f1cd15507a12c1a2bc6daf2013c86a896601898e6158",
+  "headers": {
+    "access-control-allow-origin": "*",
+    "age": "77",
+    "cache-control": "public, max-age=0, must-revalidate",
+    "content-disposition": "inline",
+    "content-encoding": "br",
+    "content-type": "text/html; charset=utf-8",
+    "date": "Sun, 06 Sep 2026 20:32:50 GMT",
+    "etag": "W/\"e474e380287e151ec3189e6c2fddc80f\"",
+    "last-modified": "Sun, 06 Sep 2026 20:31:32 GMT",
+    "server": "Vercel",
+    "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+    "transfer-encoding": "chunked",
+    "x-vercel-cache": "HIT",
+    "x-vercel-id": "cpt1::dwhf9-1788726770012-916d9c934bdc"
+  },
+  "effective_rpc": "https://rpc-bradbury.genlayer.com",
+  "effective_contract_address": "",
+  "chain_id": 4221,
+  "expected_contract_version": "2.0.0",
+  "live_version_result": {
+    "success": false,
+    "value": null,
+    "evidence": "version-read.json",
+    "reason": "version() absent in deployed source; live call rejects undefined method"
+  },
+  "normal_ui_stale_v1": null,
+  "source_sha_expected_by_deployment": "e27ebeb677f3ca8ad5f04b31b1a7fd659d9792c7",
+  "deployed_source_sha_proven": true,
+  "contract_source_sha256": "b51c43a01b2336bc1b669bb3ea7cf2b49591dc5df474f840b4c6d5dddef3c00c",
+  "note": "Production configuration FAILS. Historical address is in the effective Vite environment, not merely an inert guard. Exact-V2 allowlist makes operational address empty. No on-chain 2.0.0 claim.",
+  "effective_network": "testnetBradbury",
+  "configured_environment_contract_address": "0xEAA6Cb19AcB1E81e729224c590a5Cd5060D0c934",
+  "stale_v1_render_code_present": true,
+  "normal_ui_verification": "BLOCKED: no browser surfaces available. Bundle has historical panel and effective rejected-V1 configuration warning; no absence claim.",
+  "production_v2_config_proven": false,
+  "source_sha_expected_by_task": "e27ebeb677f3ca8ad5f04b31b1a7fd659d9792c7",
+  "configuration_error": "VITE_CONTRACT_ADDRESS points to the rejected historical V1 deployment.",
+  "contract_source_parity_evidence": "source-parity.json",
+  "github_deployment_id": 6268233543,
+  "github_reported_source_sha": "e27ebeb677f3ca8ad5f04b31b1a7fd659d9792c7",
+  "deployed_source_sha": "e27ebeb677f3ca8ad5f04b31b1a7fd659d9792c7",
+  "provenance_method": "GitHub production deployment/status record plus byte-identical immutable HTML and JS/CSS assets versus production alias"
+}

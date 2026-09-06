@@ -62,6 +62,16 @@ test("maps timeout and consensus errors to retryable reconcile states", () => {
   assert.equal(classifyLifecycleError(new Error("RPC unavailable"), HASH).state, "PENDING");
 });
 
+test("stack frame names cannot misclassify a polling timeout as rejection", () => {
+  const error = new Error("request timed out");
+  error.stack = "Error: request timed out\n at processTicksAndRejections (node:internal/process/task_queues:105:5)";
+  const result = classifyLifecycleError(error, HASH);
+  assert.equal(result.state, "TIMEOUT");
+  assert.equal(result.keepPending, true);
+  assert.equal(result.hash, HASH);
+  assert.match(normalizeNetworkError(error).diagnostic, /processTicksAndRejections/);
+});
+
 test("keeps DATA_UNAVAILABLE separate from transaction consensus outcomes", () => {
   assert.match(policyStatusMessage("DATA_UNAVAILABLE"), /unavailable|malformed|no positive trigger/i);
   assert.match(policyStatusMessage("TRIGGERED"), /finalized|claimable/i);

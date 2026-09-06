@@ -1,0 +1,7 @@
+{
+  "retrieved_at_utc": "2026-09-06T20:32:45.633Z",
+  "url": "https://rpc-bradbury.genlayer.com",
+  "request": "{\"jsonrpc\":\"2.0\",\"id\":1788726765486,\"method\":\"gen_getContractCode\",\"params\":[\"0x055F97140CE35FD1e656ebb3D204952A46646681\"]}",
+  "http_status": 200,
+  "response": "{\"jsonrpc\":\"2.0\",\"result\":null,\"error\":{\"code\":-32602,\"message\":\"invalid parameter: expected object\"},\"id\":1788726765486}\n"
+}

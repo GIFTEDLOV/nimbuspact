@@ -1,0 +1,13 @@
+{
+  "retrieved_at_utc": "2026-09-06T20:38:36.055Z",
+  "request": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "eth_getBalance",
+    "params": [
+      "0x055F97140CE35FD1e656ebb3D204952A46646681",
+      "latest"
+    ]
+  },
+  "response": "{\"jsonrpc\":\"2.0\",\"result\":\"0x2386f26fc10000\",\"id\":1}\n"
+}

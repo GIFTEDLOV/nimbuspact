@@ -1,0 +1,47 @@
+{
+  "hash": "0xef9d035c4d7714774fda42efa72b07d02a89dda851d8ab7dac5ac8366c2e3c56",
+  "target": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+  "method": "create_policy",
+  "arguments": [
+    "Lagos Island",
+    "6.5244",
+    "3.3792",
+    "2026-09-05",
+    "2026-09-06",
+    "HEAVY_RAIN",
+    "50.000",
+    "0x4f7a14c8cd83caa18fafc35aa91a8483cc95e3e5",
+    "10000000000000000"
+  ],
+  "submitted_value_wei": "10000000000000000",
+  "submitted_value_gen": "0.01",
+  "consensus_status": "FINALIZED",
+  "execution_result": "FINISHED_WITH_RETURN",
+  "consensus_result": "AGREE",
+  "policy_id": "p-1",
+  "finalized_success_and_expected_state": true,
+  "validator_evidence": {
+    "five_of_five_proven": true,
+    "source_fields": "lastRound.roundValidators, votesRevealed, validatorVotes; independently decoded getTransactionAllData in all-data.json; raw eth_call responses in ../../../rpc",
+    "round": "0",
+    "validators": [
+      "0x992E8D62263eD1Fe2E14FfB11aDf1080edBe4b5a",
+      "0x7c23E70217AB2A9E777940Eb769bA4198d1BaA61",
+      "0x77a07271abB443F55be19c357AA35206BeB63E1d",
+      "0xb4Fb7ADc6877a6A16bd131c7c9270834bD3DEf34",
+      "0x9D998aD7C7f9Cc448A4DbDf49edD7CADBe3d57B6"
+    ],
+    "votes": [
+      "AGREE",
+      "AGREE",
+      "AGREE",
+      "AGREE",
+      "AGREE"
+    ]
+  },
+  "state_equivalents": {
+    "escrow_funded": true,
+    "settled": false,
+    "explanation": "Derived from payable successful creation, exact stored payout, ACTIVE, withdrawn=false, refunded=false, and matching current contract balance. These are not literal contract fields."
+  }
+}

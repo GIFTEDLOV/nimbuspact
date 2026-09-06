@@ -1,0 +1,75 @@
+{
+  "retrieved_at_utc": "2026-09-06T20:32:46.877Z",
+  "result": [
+    {
+      "result": 1,
+      "txExecutionResult": 1,
+      "previousStatus": 0,
+      "status": 7,
+      "txOrigin": "0x4f7a14c8cd83caa18Fafc35aA91a8483Cc95E3E5",
+      "sender": "0x4f7a14c8cd83caa18Fafc35aA91a8483Cc95E3E5",
+      "recipient": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+      "activator": "0xf5E017C93f37E3f03595C03D5A6A98396769C175",
+      "txSlot": "1",
+      "initialRotations": "3",
+      "numOfInitialValidators": "5",
+      "epoch": "145",
+      "id": "0xef9d035c4d7714774fda42efa72b07d02a89dda851d8ab7dac5ac8366c2e3c56",
+      "randomSeed": "0xbb64e52021ae1bbf7f9664010dd27cc121dde3404dbf36231697649d84a9173b",
+      "txExecutionHash": "0xeccea6839dad6022c850105b5b640e2aa1e0506100f81f2edd23267ba490cec2",
+      "resultHash": "0x2c52366f28913ada009c1d6203a327b78e1f8c3c1ec2d56b4ceaee52cec748f7",
+      "txCalldata": "0xf897b8941604617267734d644c61676f732049736c616e6434362e3532343434332e3337393254323032362d30392d303554323032362d30392d30365448454156595f5241494e3435302e303030d4023078346637613134633863643833636161313866616663333561613931613834383363633935653365358180a0f0b7f28d8e01066d6574686f646c6372656174655f706f6c69637900",
+      "eqBlocksOutputs": "0xc786706164646564",
+      "readStateBlockRanges": [
+        {
+          "activationBlock": "20540282",
+          "processingBlock": "20540283",
+          "proposalBlock": "20540284"
+        }
+      ],
+      "validUntil": "1788520103",
+      "value": "10000000000000000",
+      "lockedStorageUnitPrice": "0",
+      "storageFeeUsed": "0"
+    },
+    [
+      {
+        "round": "0",
+        "leaderIndex": "4",
+        "votesCommitted": "5",
+        "votesRevealed": "5",
+        "appealBond": "0",
+        "rotationsLeft": "3",
+        "result": 1,
+        "roundValidators": [
+          "0x992E8D62263eD1Fe2E14FfB11aDf1080edBe4b5a",
+          "0x7c23E70217AB2A9E777940Eb769bA4198d1BaA61",
+          "0x77a07271abB443F55be19c357AA35206BeB63E1d",
+          "0xb4Fb7ADc6877a6A16bd131c7c9270834bD3DEf34",
+          "0x9D998aD7C7f9Cc448A4DbDf49edD7CADBe3d57B6"
+        ],
+        "validatorVotes": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "validatorVotesHash": [
+          "0x4f20c9ef5ce249db52bb82273f8601ad7b76b2f560e1ade1e1d4f63a87fdd1ce",
+          "0xbc58d96ec12e146289224ef411b29f5cde505c8cc730bcc8b301e03ce2a1499f",
+          "0x5963c9c45c82fbdba71b54e42d6fdf82de608179b1303264b5567f11e1feabcc",
+          "0xf67a710bbf4f434232ddd1f7f751597cac415bcd589a829d393c348f9b1ae9c8",
+          "0x951c59774f612b070a1e21be8f770bd994b8a07ed429d93a037f7574cd8d649b"
+        ],
+        "validatorResultHash": [
+          "0x2c52366f28913ada009c1d6203a327b78e1f8c3c1ec2d56b4ceaee52cec748f7",
+          "0x2c52366f28913ada009c1d6203a327b78e1f8c3c1ec2d56b4ceaee52cec748f7",
+          "0x2c52366f28913ada009c1d6203a327b78e1f8c3c1ec2d56b4ceaee52cec748f7",
+          "0x2c52366f28913ada009c1d6203a327b78e1f8c3c1ec2d56b4ceaee52cec748f7",
+          "0x2c52366f28913ada009c1d6203a327b78e1f8c3c1ec2d56b4ceaee52cec748f7"
+        ]
+      }
+    ]
+  ]
+}

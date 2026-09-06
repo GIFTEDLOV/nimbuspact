@@ -1,0 +1,38 @@
+{
+  "observed_date_utc": "2026-09-06",
+  "vercel": {
+    "command": "vercel inspect https://nimbuspact.vercel.app --json",
+    "result": "No existing credentials found. Starting login flow...",
+    "action_taken": "Stopped automatic device login with Ctrl-C; no credential entered and no deployment attempted.",
+    "existing_project_id": "prj_L18BJynNSaKWW0y82hLJBiT9HN7H",
+    "existing_team_id": "team_nYGrCwFWGaX1NqgPi6hfHowZ",
+    "project_link": "app/.vercel/project.json"
+  },
+  "wallet": {
+    "required_creator": "0x4f7a14c8cd83caa18Fafc35aA91a8483Cc95E3E5",
+    "command": "genlayer account list",
+    "public_addresses_returned": [
+      "0x82a983325de92aede126c18e9fe3b53da1ab3329",
+      "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "0x6311de989ab01ae4da77d36cc45d495fbcd4b7a8",
+      "0xe0f17bef0587c3b66d2eb4bbe705dff821abdde7",
+      "0x06bbfc5f5a06953ffdb117db376302d6bd80ebdc"
+    ],
+    "creator_present": false,
+    "root_env_file_present": false,
+    "private_key_environment_variables_present": false,
+    "private_key_values_read_or_logged": false,
+    "note": "Existing CLI accounts were not substituted for the policy creator. No account was created, funded, imported, exported or selected."
+  },
+  "browser": {
+    "cua_getState": { "apps": [], "browsers": [] },
+    "agent_browser_cli_available": false,
+    "rendered_production_ui_verified": false
+  },
+  "smallest_user_actions": [
+    "Run vercel login in this same local environment for the account authorized on the existing NimbusPact project.",
+    "Expose/connect the existing creator wallet 0x4f7a14c8cd83caa18Fafc35aA91a8483Cc95E3E5 through an authorized local wallet/browser session. Do not send a private key in chat.",
+    "Make a browser session available for production rendering and wallet verification."
+  ],
+  "stop_basis": "User instruction: if wallet/Vercel authorization is unavailable, complete possible read-only work and STOP. Evidence files and read-only collection scripts were added; no product changes or release writes performed."
+}

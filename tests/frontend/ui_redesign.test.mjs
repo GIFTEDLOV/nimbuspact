@@ -52,12 +52,11 @@ test("technical diagnostics are collapsed and user-facing error copy is safe", (
   assert.doesNotMatch(appSource, /\[object Object\]/i);
 });
 
-test("V2 proof is present while historical V1 is explicitly demoted", () => {
+test("current V2 proof excludes historical V1 presentation", () => {
   assert.match(appSource, /V2 live proof/);
   assert.match(appSource, /0x055F97140CE35FD1e656ebb3D204952A46646681/);
-  assert.match(appSource, /Developer proof and release history/);
-  assert.match(appSource, /Historical V1/);
-  assert.match(appSource, /Superseded rejected release\. Not active\./);
+  assert.match(appSource, /Developer proof/);
+  assert.doesNotMatch(appSource, /Historical V1|Superseded rejected release|0xEAA6/);
 });
 
 test("responsive and accessible presentation safeguards are defined", () => {

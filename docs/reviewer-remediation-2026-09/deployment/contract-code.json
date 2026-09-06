@@ -1,0 +1,8 @@
+{
+  "retrieved_at_utc": "2026-09-06T20:32:45.636Z",
+  "error": {
+    "name": "InvalidParamsRpcError",
+    "message": "Invalid parameters were provided to the RPC method.\nDouble check you have provided the correct parameters.\n\nDetails: invalid parameter: expected object\nVersion: viem@2.56.3",
+    "details": "invalid parameter: expected object"
+  }
+}

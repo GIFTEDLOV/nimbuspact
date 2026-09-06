@@ -1,0 +1,14 @@
+[
+  {
+    "url": "https://nimbuspact-8hgdjvssm-kolofahkelvin16-6437s-projects.vercel.app/assets/index-C5x04iXC.js",
+    "status": 200,
+    "sha256": "467ae5b69052bf30add1f1cd15507a12c1a2bc6daf2013c86a896601898e6158",
+    "matches_production": true
+  },
+  {
+    "url": "https://nimbuspact-8hgdjvssm-kolofahkelvin16-6437s-projects.vercel.app/assets/index-4A4ficFo.css",
+    "status": 200,
+    "sha256": "bd3598e37aa902b5af86e3672433aabd6e13c8d54bd8f8c6b9ff25614aa1d237",
+    "matches_production": true
+  }
+]

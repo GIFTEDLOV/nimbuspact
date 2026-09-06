@@ -1,0 +1,12 @@
+{
+  "retrieved_at_utc": "2026-09-06T20:39:40.678Z",
+  "on_chain_code_sha256": "5c6cdf0db0ba5dcd3a5a33034f0bde29f2739334ce6d21ea46d47b1e0cb39513",
+  "deployment_payload_code_sha256": "5c6cdf0db0ba5dcd3a5a33034f0bde29f2739334ce6d21ea46d47b1e0cb39513",
+  "local_checkout_bytes_sha256": "b51c43a01b2336bc1b669bb3ea7cf2b49591dc5df474f840b4c6d5dddef3c00c",
+  "local_lf_sha256": "5c6cdf0db0ba5dcd3a5a33034f0bde29f2739334ce6d21ea46d47b1e0cb39513",
+  "deployment_matches_current_code": true,
+  "source_matches_after_crlf_normalization": true,
+  "version_method_present": false,
+  "contract_redeployment_justified": false,
+  "note": "Checkout CRLF is the only source-byte difference. version() is absent from both source and deployment, not a source/deployment mismatch."
+}
