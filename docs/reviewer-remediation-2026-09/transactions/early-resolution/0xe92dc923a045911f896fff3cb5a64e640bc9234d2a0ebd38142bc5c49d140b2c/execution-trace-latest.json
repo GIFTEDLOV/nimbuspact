@@ -1,0 +1,77 @@
+{
+  "retrieved_at_utc": "2026-09-06T22:56:11.733Z",
+  "hash": "0xe92dc923a045911f896fff3cb5a64e640bc9234d2a0ebd38142bc5c49d140b2c",
+  "trace": {
+    "transaction_id": "0xe92dc923a045911f896fff3cb5a64e640bc9234d2a0ebd38142bc5c49d140b2c",
+    "result_code": 1,
+    "return_data": "0x2e046461746184024f62736572766174696f6e2077696e646f77206973207374696c6c206f70656e066576656e7473050b66696e6765727072696e7416066672616d657375160466756e6391080b6d6f64756c655f6e616d653c63707974686f6e160466756e63e184070b6d6f64756c655f6e616d653c63707974686f6e160466756e6391ff050b6d6f64756c655f6e616d653c63707974686f6e160466756e63d1ff050b6d6f64756c655f6e616d653c63707974686f6e160466756e63d184060b6d6f64756c655f6e616d653c63707974686f6e160466756e63c184060b6d6f64756c655f6e616d653c63707974686f6e160466756e63c9be070b6d6f64756c655f6e616d653c63707974686f6e160466756e63c1be070b6d6f64756c655f6e616d653c63707974686f6e160466756e6399be070b6d6f64756c655f6e616d653c63707974686f6e160466756e6381be070b6d6f64756c655f6e616d653c63707974686f6e160466756e63e9f7060b6d6f64756c655f6e616d653c63707974686f6e160466756e63d1f7060b6d6f64756c655f6e616d653c63707974686f6e160466756e63f9bd070b6d6f64756c655f6e616d653c63707974686f6e160466756e63b9070b6d6f64756c655f6e616d653c63707974686f6e106d6f64756c655f696e7374616e636573160763707974686f6e0e086d656d6f726965730d83021c4572cbd622a2304e592cff7feb498537d9b2c95fa0adb72552132f7d787fc009736f6674666c6f61740e086d656d6f726965730d8302fc9e4fa3448da50dc6ff514aba0568ba045276f58d3c60fdf4c5c3d28b16acc8046b696e644c557365724572726f720f73746f726167655f6368616e67657305",
+    "stdout": "",
+    "stderr": "",
+    "genvm_log": [
+      {
+        "file": "common/src/lib.rs:111",
+        "level": "info",
+        "message": "logging initialized",
+        "target": "genvm_common",
+        "ts": "1788734452588",
+        "version": "v0.2.11-x86_64-linux-release"
+      },
+      {
+        "file": "src/exe/run.rs:150",
+        "genvm_id": "4560310",
+        "level": "info",
+        "message": "genvm id",
+        "target": "genvm::exe::run",
+        "ts": "1788734452589"
+      },
+      {
+        "default": "v0.1.0",
+        "file": "src/runners/parse.rs:88",
+        "level": "warn",
+        "message": "runner comment does not start with version, using default",
+        "target": "genvm::runners::parse",
+        "ts": "1788734452622"
+      },
+      {
+        "file": "src/lib.rs:299",
+        "level": "info",
+        "message": "metrics",
+        "metrics": {
+          "gvm": {
+            "host": {
+              "time": 33258
+            },
+            "llm_module": {
+              "calls": 0,
+              "time": 0
+            },
+            "supervisor": {
+              "compilation_time": 0,
+              "compiled_modules": 0,
+              "precompile_hits": 2
+            },
+            "web_module": {
+              "calls": 0,
+              "time": 0
+            }
+          },
+          "llm": null,
+          "web": null
+        },
+        "target": "genvm",
+        "ts": "1788734452803"
+      },
+      {
+        "file": "src/exe/run.rs:111",
+        "level": "warn",
+        "message": "sigterm received",
+        "target": "genvm::exe::run",
+        "ts": "1788734452804"
+      }
+    ],
+    "storage_proof": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "run_time": "0s",
+    "eq_outputs": []
+  },
+  "decoded_return_data_printable": ". data Observation window is still open events fingerprint framesu func module_name<cpython func module_name<cpython func module_name<cpython func module_name<cpython func module_name<cpython func module_name<cpython func module_name<cpython func module_name<cpython func module_name<cpython func module_name<cpython func module_name<cpython func module_name<cpython func module_name<cpython func module_name<cpython module_instances cpython memories Er \" 0NY, I 7 _ %R /}x softfloat memories O D QJ h Rv <` kindLUserError storage_changes"
+}

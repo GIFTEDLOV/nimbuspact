@@ -1,0 +1,11 @@
+{
+  "retrieved_at_utc": "2026-09-06T22:56:11.738Z",
+  "hash": "0xe92dc923a045911f896fff3cb5a64e640bc9234d2a0ebd38142bc5c49d140b2c",
+  "polling_attempts": 120,
+  "polling_interval_seconds": 3,
+  "terminal_status_reached": false,
+  "last_status": "ACCEPTED",
+  "last_status_code": 5,
+  "execution_result": "FINISHED_WITH_ERROR",
+  "note": "Only the supplied hash was queried. No finalization call, replacement, or other write was submitted."
+}

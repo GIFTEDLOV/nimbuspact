@@ -1,0 +1,85 @@
+{
+  "production_url": "https://nimbuspact.vercel.app",
+  "immutable_deployment_url": "https://nimbuspact-mey3fwytg-kolofahkelvin16-6437s-projects.vercel.app",
+  "deployment_id": "dpl_9HMgaimvADkupzy72gSgzRcd3rgq",
+  "production_alias_points_to_deployment": true,
+  "retrieved_at_utc": "2026-09-06T21:31:19.731Z",
+  "deployment_created_at_utc": "2026-09-06T21:26:50.274Z",
+  "deployed_git_sha": "4b6cd393ac95d60e7ad69ae864fb423a69ba6a74",
+  "git_sha_proof": {
+    "checkout_head": "4b6cd393ac95d60e7ad69ae864fb423a69ba6a74",
+    "checkout_status_at_deployment": "clean (verified before deployment)",
+    "checkout_status_after_capture": "?? docs/reviewer-remediation-2026-09/deployment/deployment-inspect-live.json\n?? docs/reviewer-remediation-2026-09/deployment/live-assets/\n?? docs/reviewer-remediation-2026-09/deployment/live-capture-2026-09-06/\n?? docs/reviewer-remediation-2026-09/deployment/live-immutable.html\n?? docs/reviewer-remediation-2026-09/deployment/live-production.html\n?? docs/reviewer-remediation-2026-09/deployment/production-attestation-final.json\n?? scripts/_attest_live_deployment.mjs\n",
+    "temporary_capture_helper_removed_after_attestation": true,
+    "local_build_assets_match_deployed": true,
+    "method": "The committed HEAD was verified before deployment and built locally with the same Vercel command; every JS/CSS asset referenced by deployed HTML matches the immutable deployment asset hash."
+  },
+  "html": {
+    "alias_status": 200,
+    "immutable_status": 200,
+    "alias_sha256": "4069728b6261ad6918310d2e675eaa9af98090c5ff92e4d8fd6db72eb24e0b41",
+    "immutable_sha256": "4069728b6261ad6918310d2e675eaa9af98090c5ff92e4d8fd6db72eb24e0b41",
+    "alias_immutable_match": true,
+    "asset_urls": [
+      "/assets/index-DvW46Fox.js",
+      "/assets/index-4A4ficFo.css"
+    ]
+  },
+  "assets": [
+    {
+      "path": "/assets/index-DvW46Fox.js",
+      "alias_url": "https://nimbuspact.vercel.app/assets/index-DvW46Fox.js",
+      "immutable_url": "https://nimbuspact-mey3fwytg-kolofahkelvin16-6437s-projects.vercel.app/assets/index-DvW46Fox.js",
+      "alias_status": 200,
+      "immutable_status": 200,
+      "alias_sha256": "c1e0926a8faec32b51fc5b049ae2321cb44b428056294469d84ed242e9ec0a01",
+      "immutable_sha256": "c1e0926a8faec32b51fc5b049ae2321cb44b428056294469d84ed242e9ec0a01",
+      "alias_immutable_match": true,
+      "bytes": 680092
+    },
+    {
+      "path": "/assets/index-4A4ficFo.css",
+      "alias_url": "https://nimbuspact.vercel.app/assets/index-4A4ficFo.css",
+      "immutable_url": "https://nimbuspact-mey3fwytg-kolofahkelvin16-6437s-projects.vercel.app/assets/index-4A4ficFo.css",
+      "alias_status": 200,
+      "immutable_status": 200,
+      "alias_sha256": "bd3598e37aa902b5af86e3672433aabd6e13c8d54bd8f8c6b9ff25614aa1d237",
+      "immutable_sha256": "bd3598e37aa902b5af86e3672433aabd6e13c8d54bd8f8c6b9ff25614aa1d237",
+      "alias_immutable_match": true,
+      "bytes": 35250
+    }
+  ],
+  "local_build_assets": [
+    {
+      "name": "index-DvW46Fox.js",
+      "local_sha256": "c1e0926a8faec32b51fc5b049ae2321cb44b428056294469d84ed242e9ec0a01",
+      "deployed_sha256": "c1e0926a8faec32b51fc5b049ae2321cb44b428056294469d84ed242e9ec0a01",
+      "matches": true,
+      "bytes": 680092
+    },
+    {
+      "name": "index-4A4ficFo.css",
+      "local_sha256": "bd3598e37aa902b5af86e3672433aabd6e13c8d54bd8f8c6b9ff25614aa1d237",
+      "deployed_sha256": "bd3598e37aa902b5af86e3672433aabd6e13c8d54bd8f8c6b9ff25614aa1d237",
+      "matches": true,
+      "bytes": 35250
+    }
+  ],
+  "effective_configuration": {
+    "configured_contract_address": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+    "operational_contract_address": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+    "network": "testnetBradbury",
+    "rpc": "https://rpc-bradbury.genlayer.com",
+    "chain_id": 4221,
+    "v2_guard_error": "",
+    "v2_guard_accepts": true,
+    "historical_v1_literal_in_bundle": true,
+    "historical_v1_guard_present": true
+  },
+  "normal_production_ui": {
+    "stale_v1_card_terms_present": false,
+    "stale_v1_card_absent": true,
+    "evidence": "The fetched production JS bundle is the compiled normal application render path; historical V1 literal remains only in the safety guard."
+  },
+  "source_sha_matches_requested": true
+}

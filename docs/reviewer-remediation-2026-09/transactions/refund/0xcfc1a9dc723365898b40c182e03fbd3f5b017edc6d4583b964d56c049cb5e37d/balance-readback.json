@@ -1,0 +1,11 @@
+{
+  "retrieved_at_utc": "2026-09-07T09:32:34.744Z",
+  "contract": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+  "before_known": "0x2386f26fc10000",
+  "before_known_wei": "10000000000000000",
+  "before_known_gen": "0.01",
+  "after_latest": "0x0",
+  "after_finalized": "0x2386f26fc10000",
+  "after_wei": "10000000000000000",
+  "after_gen": "0.01"
+}

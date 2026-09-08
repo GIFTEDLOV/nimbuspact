@@ -1,0 +1,24 @@
+{
+  "project": {
+    "name": "nimbuspact",
+    "project_id": "prj_L18BJynNSaKWW0y82hLJBiT9HN7H",
+    "existing_project_verified": true
+  },
+  "recorded_at_utc": "2026-09-06T21:31:19.731Z",
+  "variable": "VITE_CONTRACT_ADDRESS",
+  "production": {
+    "configured_value": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+    "updated_with_force": true
+  },
+  "preview": {
+    "configured_value": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+    "updated_with_force": true
+  },
+  "deployed_production_proof": {
+    "bundle_effective_address": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+    "network": "testnetBradbury",
+    "chain_id": 4221,
+    "v2_guard_accepts": true
+  },
+  "note": "Environment values are attested through the built production bundle; no credential or secret value is included."
+}

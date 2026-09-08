@@ -1,0 +1,70 @@
+{
+  "retrieved_at_utc": "2026-09-07T09:32:32.812Z",
+  "hash": "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+  "trace": {
+    "transaction_id": "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+    "result_code": 0,
+    "return_data": "0x2e046461746100066576656e7473050b66696e6765727072696e7416066672616d657375160466756e6391080b6d6f64756c655f6e616d653c63707974686f6e160466756e63e184070b6d6f64756c655f6e616d653c63707974686f6e160466756e6391ff050b6d6f64756c655f6e616d653c63707974686f6e160466756e63d1ff050b6d6f64756c655f6e616d653c63707974686f6e160466756e63d184060b6d6f64756c655f6e616d653c63707974686f6e160466756e63c184060b6d6f64756c655f6e616d653c63707974686f6e160466756e63c9be070b6d6f64756c655f6e616d653c63707974686f6e160466756e63c1be070b6d6f64756c655f6e616d653c63707974686f6e160466756e6399be070b6d6f64756c655f6e616d653c63707974686f6e160466756e6381be070b6d6f64756c655f6e616d653c63707974686f6e160466756e63e9f7060b6d6f64756c655f6e616d653c63707974686f6e160466756e63d1f7060b6d6f64756c655f6e616d653c63707974686f6e160466756e63f9bd070b6d6f64756c655f6e616d653c63707974686f6e160466756e63b9070b6d6f64756c655f6e616d653c63707974686f6e106d6f64756c655f696e7374616e636573160763707974686f6e0e086d656d6f726965730d8302442fdd97263a139e688c1bc76720b20a01a4b43f964b2cb2b365b0798b1476ea09736f6674666c6f61740e086d656d6f726965730d8302fc9e4fa3448da50dc6ff514aba0568ba045276f58d3c60fdf4c5c3d28b16acc8046b696e643452657475726e0f73746f726167655f6368616e6765731d15a30221a18c3b5d08c02eb3d07c125fac9537c503d7c726e698692f86af6feaea51460000000483020000000000000000000000000000000008000000c7000000400000000d00000015a30221a18c3b5d08c02eb3d07c125fac9537c503d7c726e698692f86af6feaea5146000000078302000000000000000001010000000000000000000000000000000000000000000015a302da8721342eebfb59b0d4a45e7567dc0828804a3ad8e7ef16396fb008c3d06f8a000000008302524546554e444544474552454400000000000000000000000000000000000000",
+    "stdout": "",
+    "stderr": "",
+    "genvm_log": [
+      {
+        "file": "common/src/lib.rs:111",
+        "level": "info",
+        "message": "logging initialized",
+        "target": "genvm_common",
+        "ts": "1788771754502",
+        "version": "v0.2.11-x86_64-linux-release"
+      },
+      {
+        "file": "src/exe/run.rs:150",
+        "genvm_id": "4570498",
+        "level": "info",
+        "message": "genvm id",
+        "target": "genvm::exe::run",
+        "ts": "1788771754502"
+      },
+      {
+        "default": "v0.1.0",
+        "file": "src/runners/parse.rs:88",
+        "level": "warn",
+        "message": "runner comment does not start with version, using default",
+        "target": "genvm::runners::parse",
+        "ts": "1788771754534"
+      },
+      {
+        "file": "src/lib.rs:299",
+        "level": "info",
+        "message": "metrics",
+        "metrics": {
+          "gvm": {
+            "host": {
+              "time": 80903
+            },
+            "llm_module": {
+              "calls": 0,
+              "time": 0
+            },
+            "supervisor": {
+              "compilation_time": 0,
+              "compiled_modules": 0,
+              "precompile_hits": 2
+            },
+            "web_module": {
+              "calls": 0,
+              "time": 0
+            }
+          },
+          "llm": null,
+          "web": null
+        },
+        "target": "genvm",
+        "ts": "1788771754766"
+      }
+    ],
+    "storage_proof": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "run_time": "0s",
+    "eq_outputs": []
+  },
+  "decoded_return_data_printable": ".\u0004data\u0000\u0006events\u0005\u000bfingerprint\u0016\u0006framesu\u0016\u0004func\b\u000bmodule_name<cpython\u0016\u0004funcá\u0007\u000bmodule_name<cpython\u0016\u0004funcÿ\u0005\u000bmodule_name<cpython\u0016\u0004funcÑÿ\u0005\u000bmodule_name<cpython\u0016\u0004funcÑ\u0006\u000bmodule_name<cpython\u0016\u0004funcÁ\u0006\u000bmodule_name<cpython\u0016\u0004funcÉ¾\u0007\u000bmodule_name<cpython\u0016\u0004funcÁ¾\u0007\u000bmodule_name<cpython\u0016\u0004func¾\u0007\u000bmodule_name<cpython\u0016\u0004func¾\u0007\u000bmodule_name<cpython\u0016\u0004funcé÷\u0006\u000bmodule_name<cpython\u0016\u0004funcÑ÷\u0006\u000bmodule_name<cpython\u0016\u0004funcù½\u0007\u000bmodule_name<cpython\u0016\u0004func¹\u0007\u000bmodule_name<cpython\u0010module_instances\u0016\u0007cpython\u000e\bmemories\r\u0002D/Ý&:\u0013h\u001bÇg ²\n\u0001¤´?K,²³e°y\u0014vê\tsoftfloat\u000e\bmemories\r\u0002üO£D¥\rÆÿQJº\u0005hº\u0004Rvõ<`ýôÅÃÒ\u0016¬È\u0004kind4Return\u000fstorage_changes\u001d\u0015£\u0002!¡;]\bÀ.³Ð|\u0012_¬7Å\u0003×Ç&æi/¯oêêQF\u0000\u0000\u0000\u0004\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\b\u0000\u0000\u0000Ç\u0000\u0000\u0000@\u0000\u0000\u0000\r\u0000\u0000\u0000\u0015£\u0002!¡;]\bÀ.³Ð|\u0012_¬7Å\u0003×Ç&æi/¯oêêQF\u0000\u0000\u0000\u0007\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0015£\u0002Ú!4.ëûY°Ô¤^ugÜ\b(J:Øçï\u00169o°\bÃÐo\u0000\u0000\u0000\u0000\u0002REFUNDEDGERED\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000"
+}

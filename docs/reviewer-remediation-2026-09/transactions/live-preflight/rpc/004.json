@@ -1,0 +1,7 @@
+{
+  "retrieved_at_utc": "2026-09-06T21:42:17.340Z",
+  "url": "https://rpc-bradbury.genlayer.com",
+  "request": "{\"jsonrpc\":\"2.0\",\"id\":1788730937138,\"method\":\"eth_getBalance\",\"params\":[\"0x055F97140CE35FD1e656ebb3D204952A46646681\",\"latest\"]}",
+  "http_status": 200,
+  "response": "{\"jsonrpc\":\"2.0\",\"result\":\"0x2386f26fc10000\",\"id\":1788730937138}\n"
+}

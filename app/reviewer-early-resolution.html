@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NimbusPact reviewer early-resolution harness</title>
+    <style>
+      :root { color-scheme: dark; font-family: ui-sans-serif, system-ui, sans-serif; background: #17181b; color: #f2f3f5; }
+      body { margin: 0; padding: 24px; }
+      main { max-width: 980px; margin: 0 auto; }
+      h1 { margin: 0 0 8px; font-size: 28px; }
+      p { color: #b8bcc5; line-height: 1.5; }
+      .warning { border: 1px solid #8d6927; background: #2b2415; padding: 14px; border-radius: 8px; }
+      .panel { border: 1px solid #343840; background: #202226; border-radius: 8px; padding: 16px; margin: 16px 0; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+      .cell { background: #18191c; border-radius: 6px; padding: 10px; min-width: 0; }
+      .label { display: block; color: #9298a4; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+      .value { overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 13px; }
+      button { border: 0; border-radius: 6px; padding: 11px 14px; background: #78b9ff; color: #0b1725; font-weight: 700; cursor: pointer; }
+      button:disabled { cursor: not-allowed; opacity: .4; }
+      .danger { background: #ffbd72; }
+      .secondary { background: #343b47; color: #f2f3f5; }
+      label { display: flex; gap: 8px; align-items: flex-start; margin: 14px 0; color: #d4d8df; }
+      input[type="checkbox"] { margin-top: 4px; }
+      pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #111214; padding: 12px; border-radius: 6px; max-height: 520px; overflow: auto; font-size: 12px; }
+      .ok { color: #80e0a5; }
+      .bad { color: #ff9b9b; }
+      .muted { color: #9298a4; }
+      .hash { font-size: 14px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; overflow-wrap: anywhere; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>NimbusPact V2 early-resolution reviewer harness</h1>
+      <p class="warning"><strong>Temporary local harness.</strong> This page calls the unchanged V2 contract directly. It will never submit automatically, never replace a transaction, and permits one explicit broadcast only after all read-only checks pass.</p>
+
+      <section class="panel">
+        <div class="grid">
+          <div class="cell"><span class="label">Contract</span><span id="contract" class="value"></span></div>
+          <div class="cell"><span class="label">Network</span><span id="network" class="value"></span></div>
+          <div class="cell"><span class="label">Policy</span><span id="policy" class="value"></span></div>
+          <div class="cell"><span class="label">Expected creator</span><span id="expected-creator" class="value"></span></div>
+          <div class="cell"><span class="label">Connected wallet</span><span id="wallet" class="value">Not connected</span></div>
+          <div class="cell"><span class="label">Wallet chain</span><span id="wallet-chain" class="value">Not checked</span></div>
+          <div class="cell"><span class="label">Bradbury RPC chain</span><span id="rpc-chain" class="value">Not checked</span></div>
+          <div class="cell"><span class="label">Policy status</span><span id="status" class="value">Reading…</span></div>
+          <div class="cell"><span class="label">Observation end</span><span id="observation-end" class="value">Reading…</span></div>
+          <div class="cell"><span class="label">Current chain time</span><span id="current-time" class="value">Reading…</span></div>
+          <div class="cell"><span class="label">Seconds remaining</span><span id="seconds-remaining" class="value">Reading…</span></div>
+          <div class="cell"><span class="label">Read-only checks</span><span id="preflight" class="value">Reading…</span></div>
+        </div>
+        <p id="message" class="muted" role="status">Loading the finalized p-1 state…</p>
+        <button id="connect" class="secondary" type="button">Connect creator wallet</button>
+      </section>
+
+      <section class="panel">
+        <h2>One explicit broadcast</h2>
+        <label><input id="confirm" type="checkbox" /> <span>I understand this is an expected on-chain rejection test and will call <code>resolve_policy("p-1")</code> exactly once while the observation window is open.</span></label>
+        <button id="attempt" class="danger" type="button" disabled>Attempt early resolution once</button>
+        <button id="reconcile" class="secondary" type="button" hidden>Reconcile saved hash</button>
+        <p id="broadcast-status" class="muted">No transaction has been broadcast.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Reviewer evidence</h2>
+        <p id="hash-line" class="hash">No transaction hash yet.</p>
+        <pre id="evidence">Evidence will appear after the same hash reaches finality.</pre>
+        <button id="download" class="secondary" type="button" disabled>Download evidence JSON</button>
+      </section>
+    </main>
+    <script type="module" src="/src/reviewerEarlyResolution.ts"></script>
+  </body>
+</html>

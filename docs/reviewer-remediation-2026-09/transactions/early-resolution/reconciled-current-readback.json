@@ -1,0 +1,33 @@
+{
+  "evidence_type": "early_resolution_policy_readback",
+  "policy_id": "p-1",
+  "readback_context": "same-policy readback preserved immediately after the finalized rejected early-resolution execution",
+  "contract": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+  "before_state_source": "transactions/early-resolution/0xe92dc923a045911f896fff3cb5a64e640bc9234d2a0ebd38142bc5c49d140b2c/terminal-summary.json",
+  "after_state_source": "transactions/early-resolution/0xe92dc923a045911f896fff3cb5a64e640bc9234d2a0ebd38142bc5c49d140b2c/terminal-policy-readback.json",
+  "before": {
+    "status": "ACTIVE",
+    "resolution_attempts": 0,
+    "data_unavailable_since": 0,
+    "withdrawn": false,
+    "refunded": false,
+    "resolution_result": null,
+    "observed_value": null,
+    "evidence_digest": null,
+    "escrow_wei": "10000000000000000"
+  },
+  "after": {
+    "status": "ACTIVE",
+    "resolution_attempts": 0,
+    "data_unavailable_since": 0,
+    "withdrawn": false,
+    "refunded": false,
+    "resolution_result": null,
+    "observed_value": null,
+    "evidence_digest": null,
+    "escrow_wei": "10000000000000000"
+  },
+  "state_unchanged": true,
+  "escrow_unchanged": true,
+  "current_later_readback_note": "A later read after the separate finalized refund correctly shows p-1 as REFUNDED; that later lifecycle state does not replace this immediate post-rejection readback."
+}

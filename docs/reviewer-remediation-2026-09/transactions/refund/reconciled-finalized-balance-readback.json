@@ -1,0 +1,26 @@
+{
+  "evidence_type": "fresh_finalized_balance_readback_after_refund",
+  "retrieved_at_utc": "2026-09-08T18:56:05.568Z",
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "chain_id": 4221,
+  "contract": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+  "state_reference": {
+    "block_tag": "finalized",
+    "block_number": "21125129",
+    "block_hash": "0xccaea9e220b8ef4c24283e8744c78ad589e6d317c00117b13e7cb7e5902e7052",
+    "block_timestamp": "1788892712"
+  },
+  "eth_getBalance": {
+    "latest": "0x0",
+    "finalized": "0x0"
+  },
+  "balance_wei": {
+    "latest": "0",
+    "finalized": "0"
+  },
+  "balance_gen": {
+    "latest": "0",
+    "finalized": "0"
+  },
+  "semantics": "This is a fresh read against the current finalized state. It is not the stale pre-refund finalized-tag value preserved in the earlier capture."
+}

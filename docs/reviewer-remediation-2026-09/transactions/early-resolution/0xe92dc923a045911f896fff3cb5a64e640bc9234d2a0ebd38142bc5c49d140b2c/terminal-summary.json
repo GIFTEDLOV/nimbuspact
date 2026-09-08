@@ -1,0 +1,160 @@
+{
+  "retrieved_at_utc": "2026-09-07T08:04:08.723Z",
+  "hash": "0xe92dc923a045911f896fff3cb5a64e640bc9234d2a0ebd38142bc5c49d140b2c",
+  "contract": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+  "policy_id": "p-1",
+  "network": "Testnet Bradbury",
+  "chain_id": 4221,
+  "terminal": true,
+  "final_status": "FINALIZED",
+  "final_status_code": 7,
+  "execution_status": "FINISHED_WITH_ERROR",
+  "execution_code": 2,
+  "execution_result": "FINISHED_WITH_ERROR",
+  "execution_error": "Observation window is still open",
+  "consensus_status": "AGREE",
+  "consensus_code": 1,
+  "leader_receipt": {
+    "leader_index": "3",
+    "leader": "0x9D998aD7C7f9Cc448A4DbDf49edD7CADBe3d57B6"
+  },
+  "validator_receipts": {
+    "validators": [
+      "0x0c526A6af46A038E31dA21C123756Ab2D75f06Bc",
+      "0x992E8D62263eD1Fe2E14FfB11aDf1080edBe4b5a",
+      "0xa856ae1b278F030082c66Fa50A5F51F485D1F940",
+      "0x9D998aD7C7f9Cc448A4DbDf49edD7CADBe3d57B6",
+      "0x58a7b7ac6Cb01843e4e5af117C551E59449E0F49"
+    ],
+    "votes_raw": [
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "votes_name": [
+      "DISAGREE",
+      "DISAGREE",
+      "DISAGREE",
+      "DISAGREE",
+      "DISAGREE"
+    ],
+    "vote_hashes": [
+      "0x92a4d50b330c50e3c266cbccd7fbc086999480f6e793d4e67d0579e193fddb24",
+      "0x945df184595da791560f86e85c4166110faf94c0272eeccd1499f219b77505ae",
+      "0xffb3c4319e99f3e3d710408eb27c488599b9f88c87ad07ed8e4eb7bd4dd6a654",
+      "0xd3275603fe8ad07c60c952405ef2d9d367a6ababc00f07539f6863cb72100834",
+      "0x2cb584681b9d239289c2b51e552db3ba0fb26cd13adbf7ed7069fd074b180f6f"
+    ],
+    "result_hashes": [
+      "0xacbd9402bb7c4f21575d98a236d23fc05adb25f86fc7c64cd8235d4feb0acaad",
+      "0xacbd9402bb7c4f21575d98a236d23fc05adb25f86fc7c64cd8235d4feb0acaad",
+      "0xacbd9402bb7c4f21575d98a236d23fc05adb25f86fc7c64cd8235d4feb0acaad",
+      "0xacbd9402bb7c4f21575d98a236d23fc05adb25f86fc7c64cd8235d4feb0acaad",
+      "0xacbd9402bb7c4f21575d98a236d23fc05adb25f86fc7c64cd8235d4feb0acaad"
+    ],
+    "votes_committed": "5",
+    "votes_revealed": "5"
+  },
+  "finalized_at_exposed": false,
+  "finalized_at_observed_utc": "2026-09-07T08:04:08.723Z",
+  "finalized_block_exposed": false,
+  "read_state_block_range": {
+    "activationBlock": "20921081",
+    "processingBlock": "20921081",
+    "proposalBlock": "20921083"
+  },
+  "latest_block_observed": {
+    "baseFeePerGas": "0x709a3ec",
+    "difficulty": "0x0",
+    "extraData": "0x",
+    "gasLimit": "0x5f5e100",
+    "gasUsed": "0x26f56",
+    "hash": "0xc94e1ca45d03ee4991e51de46d61217f269070caf28824a2c2b01b75dcd890b6",
+    "logsBloom": "0x00000000000000000000004000000400000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000001000800000000000000000000000000000000000000000010000000000001000000000000000000000000000020000008000000000000000000000000000000800002000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000002000000080000000000000000000000000000000000000000000000000000000",
+    "miner": "0xf51b92325d0661018fc792454ce6be5c588dadd0",
+    "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000001",
+    "nonce": "0x0000000000000000",
+    "number": "0x13ff165",
+    "parentHash": "0x48c66769d0bf65e89279ef7912b70fe7c25d30a767ed726b963c5d7b1f1f4360",
+    "receiptsRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
+    "size": "0x22a",
+    "stateRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "timestamp": "0x6a9e6ffc",
+    "totalDifficulty": "0x0",
+    "transactions": [
+      "0xa88c952dcc284aa2cf4a9c8363be75f319833d5c9c8a6e44a4801db9230f66fa"
+    ],
+    "transactionsRoot": "0x06fdc28d5c4562a1abbec83aee07d8d98f72545f6371dc83646f0cf1a0aa514f",
+    "uncles": []
+  },
+  "current_timestamp_rpc": "1788768245",
+  "current_timestamp_utc": "2026-09-07T08:04:05.000Z",
+  "post_policy_file": "terminal-policy-readback.json",
+  "escrow_file": "terminal-escrow-balance.json",
+  "trace_file": "execution-trace-terminal.json",
+  "tx_hash": "0xe92dc923a045911f896fff3cb5a64e640bc9234d2a0ebd38142bc5c49d140b2c",
+  "latest_status": "FINALIZED",
+  "consensus_raw": {
+    "result": 1,
+    "resultName": "AGREE",
+    "lastRoundResult": 1
+  },
+  "validator_raw_summary": {
+    "validator_count": 5,
+    "votes_committed": "5",
+    "votes_revealed": "5",
+    "validatorVotes": [
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "validatorVotesName": [
+      "DISAGREE",
+      "DISAGREE",
+      "DISAGREE",
+      "DISAGREE",
+      "DISAGREE"
+    ],
+    "validatorResultHash": [
+      "0xacbd9402bb7c4f21575d98a236d23fc05adb25f86fc7c64cd8235d4feb0acaad",
+      "0xacbd9402bb7c4f21575d98a236d23fc05adb25f86fc7c64cd8235d4feb0acaad",
+      "0xacbd9402bb7c4f21575d98a236d23fc05adb25f86fc7c64cd8235d4feb0acaad",
+      "0xacbd9402bb7c4f21575d98a236d23fc05adb25f86fc7c64cd8235d4feb0acaad",
+      "0xacbd9402bb7c4f21575d98a236d23fc05adb25f86fc7c64cd8235d4feb0acaad"
+    ]
+  },
+  "pre_state": {
+    "status": "ACTIVE",
+    "payout_amount": "10000000000000000",
+    "resolution_attempts": "0",
+    "data_unavailable_since": "0",
+    "withdrawn": false,
+    "refunded": false,
+    "evidence_digest": "",
+    "resolution_code": ""
+  },
+  "post_state": {
+    "status": "ACTIVE",
+    "payout_amount": "10000000000000000",
+    "resolution_attempts": "0",
+    "data_unavailable_since": "0",
+    "withdrawn": false,
+    "refunded": false,
+    "evidence_digest": "",
+    "resolution_code": ""
+  },
+  "state_unchanged": true,
+  "escrow_balance_latest": "0x2386f26fc10000",
+  "escrow_balance_finalized": "0x2386f26fc10000",
+  "escrow_balance_wei": "10000000000000000",
+  "escrow_balance_gen": "0.01",
+  "escrow_protected": true,
+  "early_window_enforcement_proven": true,
+  "consensus_validator_explanation": "The installed GenLayerJS schema keeps transaction.result/resultName (TransactionResult) separate from lastRound.validatorVotes/validatorVotesName (VoteType[]) and txExecutionResult/txExecutionResultName (ExecutionResult). The raw transaction has result=1/AGREE, validatorVotes=[2,2,2,2,2]/DISAGREE, and txExecutionResult=2/FINISHED_WITH_ERROR. This proves the fields are distinct; it does not support a 5/5 AGREE validator claim.",
+  "trace_decoded_printable": ".\u0004data\u0002Observation window is still open\u0006events\u0005\u000bfingerprint\u0016\u0006framesu\u0016\u0004func\b\u000bmodule_name<cpython\u0016\u0004funcá\u0007\u000bmodule_name<cpython\u0016\u0004funcÿ\u0005\u000bmodule_name<cpython\u0016\u0004funcÑÿ\u0005\u000bmodule_name<cpython\u0016\u0004funcÑ\u0006\u000bmodule_name<cpython\u0016\u0004funcÁ\u0006\u000bmodule_name<cpython\u0016\u0004funcÉ¾\u0007\u000bmodule_name<cpython\u0016\u0004funcÁ¾\u0007\u000bmodule_name<cpython\u0016\u0004func¾\u0007\u000bmodule_name<cpython\u0016\u0004func¾\u0007\u000bmodule_name<cpython\u0016\u0004funcé÷\u0006\u000bmodule_name<cpython\u0016\u0004funcÑ÷\u0006\u000bmodule_name<cpython\u0016\u0004funcù½\u0007\u000bmodule_name<cpython\u0016\u0004func¹\u0007\u000bmodule_name<cpython\u0010module_instances\u0016\u0007cpython\u000e\bmemories\r\u0002\u001cErËÖ\"¢0NY,ÿëI7Ù²É_ ­·%R\u0013/}xÀ\tsoftfloat\u000e\bmemories\r\u0002üO£D¥\rÆÿQJº\u0005hº\u0004Rvõ<`ýôÅÃÒ\u0016¬È\u0004kindLUserError\u000fstorage_changes\u0005"
+}

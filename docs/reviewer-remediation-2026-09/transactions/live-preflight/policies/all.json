@@ -1,0 +1,31 @@
+{
+  "retrieved_at_utc": "2026-09-06T21:42:22.553Z",
+  "result": {
+    "p-1": {
+      "beneficiary": "0x4f7a14c8cd83caa18Fafc35aA91a8483Cc95E3E5",
+      "creator": "0x4f7a14c8cd83caa18Fafc35aA91a8483Cc95E3E5",
+      "data_unavailable_since": 0,
+      "end_date": "2026-09-06",
+      "evidence_digest": "",
+      "evidence_url": "https://archive-api.open-meteo.com/v1/archive?latitude=6.5244&longitude=3.3792&start_date=2026-09-05&end_date=2026-09-06&daily=precipitation_sum%2Ctemperature_2m_max%2Cwind_speed_10m_max&timezone=UTC",
+      "latitude": "6.5244",
+      "location_name": "Lagos Island",
+      "longitude": "3.3792",
+      "metric": "PRECIPITATION_MM",
+      "observation_end_timestamp": 1788739200,
+      "observation_start_timestamp": 1788566400,
+      "observed_value": "",
+      "payout_amount": "10000000000000000",
+      "policy_id": "p-1",
+      "refunded": false,
+      "resolution_attempts": 0,
+      "resolution_code": "",
+      "resolution_result": "",
+      "start_date": "2026-09-05",
+      "status": "ACTIVE",
+      "threshold": "50.000",
+      "trigger_type": "HEAVY_RAIN",
+      "withdrawn": false
+    }
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "captured_at_utc": "2026-09-07T09:32:39.847Z",
+  "tx_hash": "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+  "contract": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+  "policy_id": "p-1",
+  "network": "Testnet Bradbury",
+  "chain_id": 4221,
+  "final_status": "FINALIZED",
+  "final_status_code": 7,
+  "execution_status": "FINISHED_WITH_RETURN",
+  "execution_code": 1,
+  "execution_result": "FINISHED_WITH_RETURN",
+  "execution_error": null,
+  "consensus_raw": {
+    "result": 1,
+    "resultName": "AGREE",
+    "lastRoundResult": 1
+  },
+  "validator_raw": {
+    "roundValidators": [
+      "0x58a7b7ac6Cb01843e4e5af117C551E59449E0F49",
+      "0x422357d87B035e478777C84748BAC834CE2A9597",
+      "0xB7551beF37a05995218f9a1BB7A93e5B6705f535",
+      "0x96298d411a2D622945BEACa6112374583b501d52",
+      "0xA58D6FcCD69eaafB5869dA58913f116045D75444"
+    ],
+    "validatorVotes": [
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "validatorVotesName": [
+      "AGREE",
+      "AGREE",
+      "AGREE",
+      "AGREE",
+      "AGREE"
+    ],
+    "validatorVotesHash": [
+      "0x1c7b68bef3d4f1d56afe5329b448d072f9773de7f75ada449afb82ea6f47fb14",
+      "0x822845b468b8b76d25658e125aa9119193861cfe0f635ff753d6c68b6ca9baa0",
+      "0x81405deac9b2a85a26d0bc6b2dd4ad43fcb78585b82dd0effbd9c67e3b68cc2d",
+      "0xb8a09e0f82312535dd375f4ddae28ee09f26471d18c3f17ed0d8d451de9eb05f",
+      "0x08b48b8858c16807d770e7e906fb37a5fc3e7536b890533aba09e077b50b4234"
+    ],
+    "validatorResultHash": [
+      "0x3d948559e719d2625cdec330f850689f043bb14056370fcfee76160154ba9641",
+      "0x3d948559e719d2625cdec330f850689f043bb14056370fcfee76160154ba9641",
+      "0x3d948559e719d2625cdec330f850689f043bb14056370fcfee76160154ba9641",
+      "0x3d948559e719d2625cdec330f850689f043bb14056370fcfee76160154ba9641",
+      "0x3d948559e719d2625cdec330f850689f043bb14056370fcfee76160154ba9641"
+    ],
+    "votesCommitted": "5",
+    "votesRevealed": "5"
+  },
+  "post_state": {
+    "status": "REFUNDED",
+    "payout_amount": "10000000000000000",
+    "withdrawn": true,
+    "refunded": true,
+    "creator": "0x4f7a14c8cd83caa18Fafc35aA91a8483Cc95E3E5",
+    "beneficiary": "0x4f7a14c8cd83caa18Fafc35aA91a8483Cc95E3E5",
+    "resolution_result": "NOT_TRIGGERED",
+    "resolution_code": "NONE",
+    "resolution_attempts": "1",
+    "data_unavailable_since": "0"
+  },
+  "contract_balance_before": "0x2386f26fc10000",
+  "contract_balance_after_latest": "0x0",
+  "contract_balance_after_finalized": "0x2386f26fc10000",
+  "transfer": {
+    "parent_messages": [
+      {
+        "messageType": 0,
+        "recipient": "0x4f7a14c8cd83caa18Fafc35aA91a8483Cc95E3E5",
+        "value": "10000000000000000",
+        "data": "0x",
+        "onAcceptance": false,
+        "saltNonce": "0"
+      }
+    ],
+    "child_ids": [
+      "0xb955af1c1597bb018a314a9d5c98d66daf8b816ae9214f78c99448ef3e79327e",
+      "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+      "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+      "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+      "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+      "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+      "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+      "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+      "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+      "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+      "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+      "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+      "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+      "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+      "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d"
+    ],
+    "relevant_child_ids": [],
+    "direct_receipt_exposed": false,
+    "recipient": "0x4f7a14c8cd83caa18Fafc35aA91a8483Cc95E3E5",
+    "value": "10000000000000000",
+    "status": "PARENT_FINALIZED_MESSAGE_RECORD",
+    "proven": true,
+    "latest_balance_after": "0x0",
+    "finalized_balance_after": "0x2386f26fc10000",
+    "limitation": "The finalized parent exposes the recipient/value message record. No distinct refund child or transfer receipt was exposed; getTriggeredTransactionIds returned one unrelated child and duplicate parent IDs. The finalized balance tag continued to report the pre-refund balance while latest reported zero."
+  },
+  "refund_state_proven": true,
+  "finalized_balance_tag_caveat": "The RPC finalized tag still returned the pre-refund 0.01 GEN balance at capture; latest returned 0 GEN and the policy/message state prove the refund."
+}

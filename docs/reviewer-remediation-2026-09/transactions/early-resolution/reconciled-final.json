@@ -1,0 +1,36 @@
+{
+  "evidence_type": "existing_early_resolution_reconciliation",
+  "protocol": "GenLayer Bradbury",
+  "chain_id": 4221,
+  "contract": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+  "policy_id": "p-1",
+  "outer_evm_hash": null,
+  "protocol_tx_id": "0xe92dc923a045911f896fff3cb5a64e640bc9234d2a0ebd38142bc5c49d140b2c",
+  "execution_tx_hash": "0xf76e8cbbe06e9b65a7a10f2fb372fe9a5652cd9db29d25addff00bba52c369f6",
+  "status": "FINALIZED",
+  "status_code": 7,
+  "execution": "FINISHED_WITH_ERROR",
+  "execution_code": 2,
+  "execution_error": "UserError: Observation window is still open",
+  "consensus": {
+    "result": "AGREE",
+    "committed": 5,
+    "revealed": 5,
+    "validator_result_hashes": [
+      "0xacbd9402bb7c4f21575d98a236d23fc05adb25f86fc7c64cd8235d4feb0acaad"
+    ],
+    "validator_result_hashes_all_equal": true
+  },
+  "read_state_block_range": {
+    "activation": 20921081,
+    "processing": 20921081,
+    "proposal": 20921083
+  },
+  "proof_sources": [
+    "transactions/early-resolution/0xe92dc923a045911f896fff3cb5a64e640bc9234d2a0ebd38142bc5c49d140b2c/terminal-transaction.json",
+    "transactions/early-resolution/0xe92dc923a045911f896fff3cb5a64e640bc9234d2a0ebd38142bc5c49d140b2c/execution-trace-terminal.json",
+    "transactions/early-resolution/0xe92dc923a045911f896fff3cb5a64e640bc9234d2a0ebd38142bc5c49d140b2c/terminal-summary.json"
+  ],
+  "reconciled_same_transaction": true,
+  "replacement_write_broadcast": false
+}

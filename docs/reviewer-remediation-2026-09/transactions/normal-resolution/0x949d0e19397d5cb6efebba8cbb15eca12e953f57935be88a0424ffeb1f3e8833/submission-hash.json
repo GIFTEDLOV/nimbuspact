@@ -1,0 +1,14 @@
+{
+  "captured_at_utc": "2026-09-07T08:18:00.486Z",
+  "hash": "0x949d0e19397d5cb6efebba8cbb15eca12e953f57935be88a0424ffeb1f3e8833",
+  "contract": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+  "policy_id": "p-1",
+  "method": "resolve_policy",
+  "args": [
+    "p-1"
+  ],
+  "value": "0",
+  "network": "Testnet Bradbury",
+  "chain_id": 4221,
+  "note": "Supplied existing hash; no broadcast performed by this reconciliation."
+}

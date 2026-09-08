@@ -1,0 +1,22 @@
+{
+  "deployment_id": "dpl_9HMgaimvADkupzy72gSgzRcd3rgq",
+  "immutable_url": "https://nimbuspact-mey3fwytg-kolofahkelvin16-6437s-projects.vercel.app",
+  "production_alias": "https://nimbuspact.vercel.app",
+  "ready_state": "READY",
+  "target": "production",
+  "created_at_epoch_ms": 1788730010274,
+  "created_at_utc": "2026-09-06T21:26:50.274Z",
+  "aliases": [
+    "nimbuspact.vercel.app",
+    "nimbuspact-kolofahkelvin16-6437s-projects.vercel.app"
+  ],
+  "build": {
+    "entrypoint": ".",
+    "framework": "vite",
+    "install_command": "npm ci --prefix app",
+    "build_command": "npm --prefix app run build",
+    "output_directory": "app/dist",
+    "node_version": "24.x"
+  },
+  "source_command": "vercel deploy --prod --yes --project prj_L18BJynNSaKWW0y82hLJBiT9HN7H -F json"
+}

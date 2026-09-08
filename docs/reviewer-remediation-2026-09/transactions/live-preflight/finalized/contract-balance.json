@@ -1,0 +1,16 @@
+{
+  "retrieved_at_utc": "2026-09-06T21:47:02.5431893Z",
+  "contract": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+  "eth_getBalance_latest": "0x2386f26fc10000",
+  "eth_getBalance_finalized": "0x2386f26fc10000",
+  "balance_wei": "10000000000000000",
+  "balance_gen": "0.01",
+  "note": "Both latest and finalized balance tags return the same 0.01 GEN balance. The Policy type has no escrow_funded field, so escrow funding is inferred from the active unsettled state plus this balance.",
+  "raw_request": {
+    "method": "eth_getBalance",
+    "params": [
+      "0x055F97140CE35FD1e656ebb3D204952A46646681",
+      "latest/finalized"
+    ]
+  }
+}

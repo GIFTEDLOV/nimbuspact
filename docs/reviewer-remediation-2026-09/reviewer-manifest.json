@@ -1,0 +1,60 @@
+{
+  "manifest": "NimbusPact reviewer remediation final evidence",
+  "recorded_at": "2026-09-08",
+  "contract": {
+    "version": "V2",
+    "address": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+    "network": "testnetBradbury",
+    "chain_id": 4221,
+    "rpc": "https://rpc-bradbury.genlayer.com",
+    "source_sha_normalized": "5c6cdf0db0ba5dcd3a5a33034f0bde29f2739334ce6d21ea46d47b1e0cb39513",
+    "deployment_tx": "0xed523aaf12afa7633651f82f9ed1cafc0d133a1712faa5f48b57a7c5f1958d15",
+    "deployment_execution_tx": "0x539fe96dc7a16f81389be4b3dd034d333e593b563e4e7f946b6b3cd4b22653ed"
+  },
+  "historical_v1": {
+    "address": "0xEAA6Cb19AcB1E81e729224c590a5Cd5060D0c934",
+    "status": "REJECTED_HISTORICAL",
+    "evidence": "docs/history/v1/bradbury-smoke.json"
+  },
+  "early_resolution": {
+    "policy_id": "p-1",
+    "evm_hash": null,
+    "protocol_tx_id": "0xe92dc923a045911f896fff3cb5a64e640bc9234d2a0ebd38142bc5c49d140b2c",
+    "execution_tx_hash": "0xf76e8cbbe06e9b65a7a10f2fb372fe9a5652cd9db29d25addff00bba52c369f6",
+    "final_status": "FINALIZED",
+    "execution": "FINISHED_WITH_ERROR",
+    "error": "UserError: Observation window is still open",
+    "before_after": "transactions/early-resolution/reconciled-current-readback.json",
+    "state_unchanged": true,
+    "escrow_unchanged": true,
+    "replacement_write_required": false
+  },
+  "refund": {
+    "policy_id": "p-1",
+    "evm_hash": null,
+    "protocol_tx_id": "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+    "execution_tx_hash": "0x2f72e84a659b344b2e18ec523d6dcb613fc556134b22a00a972ff17b8d547573",
+    "final_status": "FINALIZED",
+    "execution": "FINISHED_WITH_RETURN",
+    "final_state": "REFUNDED, withdrawn=true, refunded=true, escrow=0",
+    "gen_effect_proof": "transactions/refund/reconciled-effect-final.json"
+  },
+  "production": {
+    "url": "https://nimbuspact.vercel.app",
+    "vercel_deployment_id": "dpl_9HMgaimvADkupzy72gSgzRcd3rgq",
+    "state": "READY",
+    "source_sha": "4b6cd393ac95d60e7ad69ae864fb423a69ba6a74",
+    "contract": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+    "network": "testnetBradbury",
+    "chain_id": 4221,
+    "rpc": "https://rpc-bradbury.genlayer.com",
+    "attestation": "deployment/production-attestation-current.json"
+  },
+  "reviewer_conclusion": {
+    "current_v2_production_verified": true,
+    "early_resolution_finalized_rejection_verified": true,
+    "refund_finalized_and_state_verified": true,
+    "refund_outgoing_gen_effect_verified": true,
+    "stale_v1_production_attestation_reconciled": true
+  }
+}

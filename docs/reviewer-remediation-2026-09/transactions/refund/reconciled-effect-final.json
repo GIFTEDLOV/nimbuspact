@@ -1,0 +1,36 @@
+{
+  "evidence_type": "refund_finalized_value_effect_reconciliation",
+  "protocol": "GenLayer Bradbury",
+  "chain_id": 4221,
+  "contract": "0x055F97140CE35FD1e656ebb3D204952A46646681",
+  "policy_id": "p-1",
+  "refund_protocol_tx_id": "0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d",
+  "parent_resolution_protocol_tx_id": "0x949d0e19397d5cb6efebba8cbb15eca12e953f57935be88a0424ffeb1f3e8833",
+  "refund_execution_tx_hash": "0x2f72e84a659b344b2e18ec523d6dcb613fc556134b22a00a972ff17b8d547573",
+  "outer_evm_receipt": null,
+  "status": "FINALIZED",
+  "execution": "FINISHED_WITH_RETURN",
+  "post_state": {
+    "status": "REFUNDED",
+    "withdrawn": true,
+    "refunded": true,
+    "escrow_wei": "0",
+    "payout_wei": "10000000000000000"
+  },
+  "gen_effect": {
+    "proven": true,
+    "type": "parent_finalized_message_plus_finalized_balance_delta",
+    "message_recipient": "0x4f7a14c8cd83caa18Fafc35aA91a8483Cc95E3E5",
+    "message_value_wei": "10000000000000000",
+    "contract_balance_before_wei": "10000000000000000",
+    "contract_balance_after_finalized_wei": "0",
+    "contract_balance_delta_wei": "-10000000000000000",
+    "message_source": "transactions/refund/0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d/normalized-summary.json",
+    "balance_before_source": "transactions/refund/0xcfc1a9dc723365898b40c182e03fbd3f5b017edc6d4583b964d56c049cb5e37d/balance-readback.json",
+    "balance_after_source": "transactions/refund/reconciled-finalized-balance-readback.json",
+    "child_receipt_exposed": false,
+    "child_receipt_note": "No distinct refund child receipt was exposed by the configured runtime/RPC; no child receipt is invented.",
+    "finalized_balance_state_reference": "transactions/refund/reconciled-finalized-balance-readback.json"
+  },
+  "reconciled_same_transaction": true
+}

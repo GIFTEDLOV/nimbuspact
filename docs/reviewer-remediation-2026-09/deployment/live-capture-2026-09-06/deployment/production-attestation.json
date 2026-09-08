@@ -1,0 +1,47 @@
+{
+  "production_url": "https://nimbuspact.vercel.app",
+  "retrieved_at_utc": "2026-09-06T21:29:09.970Z",
+  "repository_head": "4b6cd393ac95d60e7ad69ae864fb423a69ba6a74",
+  "production_deployment_identifier": null,
+  "immutable_deployment_url": null,
+  "loaded_assets": [
+    {
+      "url": "https://nimbuspact.vercel.app/assets/index-DvW46Fox.js",
+      "sha256": "c1e0926a8faec32b51fc5b049ae2321cb44b428056294469d84ed242e9ec0a01",
+      "http_status": 200
+    },
+    {
+      "url": "https://nimbuspact.vercel.app/assets/index-4A4ficFo.css",
+      "sha256": "bd3598e37aa902b5af86e3672433aabd6e13c8d54bd8f8c6b9ff25614aa1d237",
+      "http_status": 200
+    }
+  ],
+  "html_sha256": "4069728b6261ad6918310d2e675eaa9af98090c5ff92e4d8fd6db72eb24e0b41",
+  "main_js_sha256": "c1e0926a8faec32b51fc5b049ae2321cb44b428056294469d84ed242e9ec0a01",
+  "headers": {
+    "access-control-allow-origin": "*",
+    "age": "0",
+    "cache-control": "public, max-age=0, must-revalidate",
+    "content-disposition": "inline",
+    "content-encoding": "br",
+    "content-type": "text/html; charset=utf-8",
+    "date": "Sun, 06 Sep 2026 21:29:13 GMT",
+    "etag": "W/\"e3d51ba241d3f6909150fc0201287148\"",
+    "last-modified": "Sun, 06 Sep 2026 21:29:13 GMT",
+    "server": "Vercel",
+    "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+    "transfer-encoding": "chunked",
+    "x-vercel-cache": "MISS",
+    "x-vercel-id": "cpt1::rslrm-1788730152719-a3aa13483199"
+  },
+  "effective_rpc": null,
+  "effective_contract_address": null,
+  "chain_id": null,
+  "expected_contract_version": "2.0.0",
+  "live_version_result": null,
+  "normal_ui_stale_v1": null,
+  "source_sha_expected_by_deployment": null,
+  "deployed_source_sha_proven": false,
+  "contract_source_sha256": "b51c43a01b2336bc1b669bb3ea7cf2b49591dc5df474f840b4c6d5dddef3c00c",
+  "note": "Initial raw capture; effective configuration and rendered UI require separate verification. SDK transaction output is decoded; exact network responses are in ../rpc."
+}
